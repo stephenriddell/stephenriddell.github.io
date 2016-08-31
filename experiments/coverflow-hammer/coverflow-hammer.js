@@ -31,19 +31,16 @@
     var mc = new Hammer.Manager(_root);
     mc.add(new Hammer.Pan({threshold: 0, pointers: 0}));
     mc.add(new Hammer.Swipe({direction:Hammer.DIRECTION_HORIZONTAL}).recognizeWith(mc.get('pan')))
-      mc.on("panstart panmove", pantry);
-    mc.on("swipe", swipetry);
+      mc.on("panstart panmove", onPan);
+    mc.on("swipe", onSwipe);
     console.log("things on");
   };
 
-  function pantry(ev){
-    console.log("pan:");
-    console.log(ev);
+  function onPan(ev){
+    scroll(offset+deltaX);
   }
 
-  function swipetry(ev){
-    console.log("swipe");
-    console.log(ev);
+  function onSwipe(ev){
   }
 
   function scroll(x){
