@@ -1,6 +1,4 @@
-
 !function(w){
-  TouchEmulator();
   let thumbnailElements = [];
   let dimX; // horizontal space taken by each element?
   let dimY;
