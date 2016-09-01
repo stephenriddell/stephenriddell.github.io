@@ -23,14 +23,15 @@
     }
     count = thumbnailElements.length;
     dimX = 125;
-    dimY = 200;
-    dist = -150;
-    shift = 10;
+    dimY = 300;
+    dist = -100;
+    shift = dimX/2;
     angle = -60;
     offset = target = 0;
-    backgroundScale = 0.9;
+    backgroundScale = 0.65;
     timeConstant = 250; //ms
-    scroll(375);
+    scroll(0);
+    autoScroll();
 
     var mc = new Hammer.Manager(_root);
     mc.add(new Hammer.Pan({threshold: 0, pointers: 0}));
@@ -50,7 +51,7 @@
 
   function onPan(ev){
     amplitude=0;
-    if(panStartPos && ev.deltaX){
+    if(panStartPos !== undefined && ev.deltaX){
       scroll(panStartPos-ev.deltaX); //when panning positively (thumb motion right), the images need to move right, which move the focus left.
     }
   }
@@ -70,7 +71,7 @@
     }
     let targetIndex = Math.round(target/dimX);
     targetIndex = targetIndex < 0 ? 0 : targetIndex;
-    targetIndex = targetIndex >= count ? count : targetIndex;
+    targetIndex = targetIndex >= count ? count -1 : targetIndex;
 
     target = targetIndex * dimX;
     amplitude = target-offset;
@@ -86,8 +87,8 @@
     let elapsed, delta;
     if(amplitude){
       elapsed = Date.now() - beginAutoTime;
-      delta = amplitude *  (Math.exp( -elapsed / timeConstant) -0.008);
-      if(delta > 1 || delta < -1){
+      delta = amplitude *  Math.exp( -elapsed / timeConstant);
+      if(delta > 4 || delta < -4){
         scroll(target-delta);
         window.requestAnimationFrame(autoScroll);
       }else{
@@ -116,7 +117,7 @@
     let center = Math.floor((offset + dimX / 2) / dimX); //the image to show at the centre;
     let delta = offset - center * dimX; //how close to the centred the cental element is
     let dir = (delta < 0) ? 1 : -1; //moving left or right? (left=positive)
-    let tween = -dir * delta * 2 / dimX; //proportion between properly centered and fully rotated to show central element
+    let tween = -dir * delta / dimX; //proportion between properly centered and fully rotated to show central element
 
     //basic centering of everything
     var alignment = 'translateX(' + (parseInt(_root.clientWidth) - dimX) / 2 + 'px) ';
@@ -161,6 +162,19 @@
       el.style.zIndex = -i;
       i++;
     }
+    //redo the slightly off center element, to tween like the centre element
+    if(center-dir >= 0 && center-dir < count){
+      el = thumbnailElements[center-dir];
+      tween = 1 - tween;
+      delta = delta + dir * dimX;
+      dir = dir * -1;
+      el.style[xform] = alignment +
+        ' translateX(' + (-delta / 2) + 'px)' + //account for off-centre
+        ' translateX(' + (dir * shift * tween) + 'px)' + //partial shift from center
+        ' translateZ(' + (dist * tween) + 'px)' + //partial going backwards
+        ' rotateY(' + (dir * angle * tween) + 'deg)' + //partial rotation
+        ' scale(' + (1 - (1-backgroundScale)*tween ) + ')';
+    }
   }
 
   xform = 'transform';
@@ -179,8 +193,8 @@
     for(i=0;i<n;++i){
       var grey = parseInt(i*255/n);
       var e = document.createElement("img");
-      e.style.height='200px';
-      e.style.width='125px';
+      e.style.height='300px';
+      e.style.width='175px';
       e.style.backgroundColor = `rgba(${grey},${grey},${grey},1)`;
       e.style.border = '1px solid limegreen';
       yield e;
