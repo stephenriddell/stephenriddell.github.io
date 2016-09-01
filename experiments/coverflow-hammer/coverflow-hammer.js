@@ -10,6 +10,7 @@
   let dist; // how far back (z-axis) to move non-centred elements
   let angle;
   let target;
+  let backgroundScale;
 
   w.coverflowPreview = function coverflowPreview(rootElement, opts){
     _root = rootElement;
@@ -22,22 +23,31 @@
     count = thumbnailElements.length;
     dimX = 125;
     dimY = 200;
-    dist = -200;
-    shift = 20;
+    dist = -150;
+    shift = 10;
     angle = -60;
     offset = target = 0;
+    backgroundScale = 0.9;
     scroll(375);
 
     var mc = new Hammer.Manager(_root);
     mc.add(new Hammer.Pan({threshold: 0, pointers: 0}));
     mc.add(new Hammer.Swipe({direction:Hammer.DIRECTION_HORIZONTAL}).recognizeWith(mc.get('pan')))
-      mc.on("panstart panmove", onPan);
+    mc.on("panstart", onPanStart);
+    mc.on("panmove", onPan);
     mc.on("swipe", onSwipe);
-    console.log("things on");
   };
 
+  let panStartPos;
+  function onPanStart(ev){
+      panStartPos = offset;
+      onPan(ev);
+  }
+
   function onPan(ev){
-    scroll(offset+deltaX);
+    if(panStartPos && ev.deltaX){
+      scroll(panStartPos-ev.deltaX); //when panning positively (thumb motion right), the images need to move right, which move the focus left.
+    }
   }
 
   function onSwipe(ev){
@@ -45,7 +55,7 @@
 
   function scroll(x){
     //limits
-    let maxOffset = dimX * count + dimX/2 - 1;
+    let maxOffset = dimX * (count - 1) + dimX/2 - 1;
     let minOffset = -dimX/2 + 1;
 
     offset = (typeof x === 'number') ? x : offset; //move to x
@@ -66,7 +76,8 @@
       ' translateX(' + (-delta / 2) + 'px)' + //account for off-centre
       ' translateX(' + (dir * shift * tween) + 'px)' + //partial shift from center
       ' translateZ(' + (dist * tween) + 'px)' + //partial going backwards
-      ' rotateY(' + (dir * angle * tween) + 'deg)'; //partial rotation
+      ' rotateY(' + (dir * angle * tween) + 'deg)' + //partial rotation
+      ' scale(' + (1 - (1-backgroundScale)*tween ) + ')';
     el.style.zIndex = 0; //set in front of others
     el.style.opacity = 1; // set fully visible
 
@@ -78,7 +89,9 @@
       el.style[xform] = alignment +
         ' translateX(' + (-shift + (-dimX * i - delta) / 2) + 'px)' +
         ' translateZ(' + dist + 'px)' +
-        ' rotateY(' + -angle + 'deg)';
+        ' rotateY(' + -angle + 'deg)' + 
+        ' scale(' + backgroundScale + ')';
+        ;
       el.style.zIndex = -i;
       el.style.opacity = 1;
 
@@ -91,7 +104,8 @@
       el.style[xform] = alignment +
         ' translateX(' + (shift + (dimX * i - delta) / 2) + 'px)' +
         ' translateZ(' + dist + 'px)' +
-        ' rotateY(' + angle + 'deg)';
+        ' rotateY(' + angle + 'deg)' +
+        ' scale(' + backgroundScale + ')';
       el.style.zIndex = -i;
       i++;
     }
@@ -116,12 +130,12 @@
       e.style.height='200px';
       e.style.width='125px';
       e.style.backgroundColor = `rgba(${grey},${grey},${grey},1)`;
-      e.style.border = '2px solid limegreen';
+      e.style.border = '1px solid limegreen';
       yield e;
     }
   }
 
-  let g = previewGenerator(6); 
+  let g = previewGenerator(12); 
   let e = document.getElementById("coverfluent");
   w.coverflowPreview(e,{
     thumbnails:g,
