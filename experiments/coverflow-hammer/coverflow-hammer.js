@@ -1,7 +1,8 @@
 !function(w){
   let thumbnailElements = [];
-  let dimX; // horizontal space taken by each element?
-  let dimY;
+  let spacingX; // the distance to space eachElement
+  let dimX;     //the actual width of the elements, they're all treated as though they are this, even if it is not true, users should supply equally sized elements for best experience
+  let dimY;     //height of the elements.
   let offset; //current position?
   let _root;
   let count; // number of elemnts to show
@@ -22,10 +23,11 @@
       rootElement.appendChild(e);
     }
     count = thumbnailElements.length;
-    dimX = 125;
+    spacingX = 125;
+    dimX = 175;
     dimY = 300;
     dist = -100;
-    shift = dimX/2;
+    shift = spacingX/2;
     angle = -60;
     offset = target = 0;
     backgroundScale = 0.65;
@@ -69,11 +71,11 @@
     if(velocity > 10 || velocity < -10){
       target = offset - 0.9 * velocity
     }
-    let targetIndex = Math.round(target/dimX);
+    let targetIndex = Math.round(target/spacingX);
     targetIndex = targetIndex < 0 ? 0 : targetIndex;
     targetIndex = targetIndex >= count ? count -1 : targetIndex;
 
-    target = targetIndex * dimX;
+    target = targetIndex * spacingX;
     amplitude = target-offset;
     beginAutoTime = Date.now();
     if(autoReqId){
@@ -87,8 +89,10 @@
     let elapsed, delta;
     if(amplitude){
       elapsed = Date.now() - beginAutoTime;
-      delta = amplitude *  Math.exp( -elapsed / timeConstant);
-      if(delta > 4 || delta < -4){
+      let adjust =  0.008; //adjust the exponential decay function by subtracting this from it so it reaches 0
+                           //It is also then multiplied so that it still has a y-intercept of 1
+      delta = amplitude *  (Math.exp( -elapsed / timeConstant) - adjust)/(1-adjust);
+      if(delta * amplitude > 0) {
         scroll(target-delta);
         window.requestAnimationFrame(autoScroll);
       }else{
@@ -100,8 +104,8 @@
   let rafRequestId;
   function scroll(x){
     //limits
-    let maxOffset = dimX * (count - 1) + dimX/2 - 1;
-    let minOffset = -dimX/2 + 1;
+    let maxOffset = spacingX * (count - 1) + spacingX/2 - 1;
+    let minOffset = -spacingX/2 + 1;
 
     offset = (typeof x === 'number') ? x : offset; //move to x
     offset = offset > maxOffset ? maxOffset : offset;
@@ -114,10 +118,10 @@
 
   function animateScroll(){
     rafRequestId = undefined;
-    let center = Math.floor((offset + dimX / 2) / dimX); //the image to show at the centre;
-    let delta = offset - center * dimX; //how close to the centred the cental element is
+    let center = Math.floor((offset + spacingX / 2) / spacingX); //the image to show at the centre;
+    let delta = offset - center * spacingX; //how close to the centred the cental element is
     let dir = (delta < 0) ? 1 : -1; //moving left or right? (left=positive)
-    let tween = -dir * delta / dimX; //proportion between properly centered and fully rotated to show central element
+    let tween = -dir * delta / spacingX; //proportion between properly centered and fully rotated to show central element
 
     //basic centering of everything
     var alignment = 'translateX(' + (parseInt(_root.clientWidth) - dimX) / 2 + 'px) ';
@@ -140,7 +144,7 @@
     while(center - i >= 0){
       el = thumbnailElements[center - i];
       el.style[xform] = alignment +
-        ' translateX(' + (-shift + (-dimX * i - delta) / 2) + 'px)' +
+        ' translateX(' + (-shift + (-spacingX * i - delta) / 2) + 'px)' +
         ' translateZ(' + dist + 'px)' +
         ' rotateY(' + -angle + 'deg)' + 
         ' scale(' + backgroundScale + ')';
@@ -155,7 +159,7 @@
     while(center + i < count){
       el = thumbnailElements[center + i];
       el.style[xform] = alignment +
-        ' translateX(' + (shift + (dimX * i - delta) / 2) + 'px)' +
+        ' translateX(' + (shift + (spacingX * i - delta) / 2) + 'px)' +
         ' translateZ(' + dist + 'px)' +
         ' rotateY(' + angle + 'deg)' +
         ' scale(' + backgroundScale + ')';
@@ -166,7 +170,7 @@
     if(center-dir >= 0 && center-dir < count){
       el = thumbnailElements[center-dir];
       tween = 1 - tween;
-      delta = delta + dir * dimX;
+      delta = delta + dir * spacingX;
       dir = dir * -1;
       el.style[xform] = alignment +
         ' translateX(' + (-delta / 2) + 'px)' + //account for off-centre
@@ -201,7 +205,7 @@
     }
   }
 
-  let g = previewGenerator(12); 
+  let g = previewGenerator(25); 
   let e = document.getElementById("coverfluent");
   w.coverflowPreview(e,{
     thumbnails:g,
