@@ -6,11 +6,12 @@
   let _root;
   let count; // number of elemnts to show
   let xform;
-  let shift; // unsure? used to subtly impact positioning - movement away from center?
+  let shift; // Distance away from centre to show non-centered element
   let dist; // how far back (z-axis) to move non-centred elements
   let angle;
   let target;
   let backgroundScale;
+  let timeConstant;
 
   w.coverflowPreview = function coverflowPreview(rootElement, opts){
     _root = rootElement;
@@ -28,6 +29,7 @@
     angle = -60;
     offset = target = 0;
     backgroundScale = 0.9;
+    timeConstant = 250; //ms
     scroll(375);
 
     var mc = new Hammer.Manager(_root);
@@ -35,7 +37,9 @@
     mc.add(new Hammer.Swipe({direction:Hammer.DIRECTION_HORIZONTAL}).recognizeWith(mc.get('pan')))
     mc.on("panstart", onPanStart);
     mc.on("panmove", onPan);
-    mc.on("swipe", onSwipe);
+    mc.on("panend swipe", onRelease);
+
+    window.addEventListener("resize",onResize);
   };
 
   let panStartPos;
@@ -45,14 +49,54 @@
   }
 
   function onPan(ev){
+    amplitude=0;
     if(panStartPos && ev.deltaX){
       scroll(panStartPos-ev.deltaX); //when panning positively (thumb motion right), the images need to move right, which move the focus left.
     }
   }
 
-  function onSwipe(ev){
+  function onResize(ev){
+    scroll(offset);
   }
 
+  let beginAutoTime;
+  let amplitude;
+  let autoReqId;
+  function onRelease(ev){
+    target = offset;
+    let velocity=  ev.velocityX * 100;
+    if(velocity > 10 || velocity < -10){
+      target = offset - 0.9 * velocity
+    }
+    let targetIndex = Math.round(target/dimX);
+    targetIndex = targetIndex < 0 ? 0 : targetIndex;
+    targetIndex = targetIndex >= count ? count : targetIndex;
+
+    target = targetIndex * dimX;
+    amplitude = target-offset;
+    beginAutoTime = Date.now();
+    if(autoReqId){
+      window.cancelAnimationFrame(autoReqId);
+    }
+    autoReqId = window.requestAnimationFrame(autoScroll);
+  }
+
+  function autoScroll(){
+    autoReqId = undefined;
+    let elapsed, delta;
+    if(amplitude){
+      elapsed = Date.now() - beginAutoTime;
+      delta = amplitude *  (Math.exp( -elapsed / timeConstant) -0.008);
+      if(delta > 1 || delta < -1){
+        scroll(target-delta);
+        window.requestAnimationFrame(autoScroll);
+      }else{
+        scroll(target);
+      }
+    }
+  }
+
+  let rafRequestId;
   function scroll(x){
     //limits
     let maxOffset = dimX * (count - 1) + dimX/2 - 1;
@@ -61,6 +105,14 @@
     offset = (typeof x === 'number') ? x : offset; //move to x
     offset = offset > maxOffset ? maxOffset : offset;
     offset = offset < minOffset ? minOffset : offset;
+    if(rafRequestId){
+      window.cancelAnimationFrame(rafRequestId);
+    }
+    rafRequestId = window.requestAnimationFrame(animateScroll);
+  }
+
+  function animateScroll(){
+    rafRequestId = undefined;
     let center = Math.floor((offset + dimX / 2) / dimX); //the image to show at the centre;
     let delta = offset - center * dimX; //how close to the centred the cental element is
     let dir = (delta < 0) ? 1 : -1; //moving left or right? (left=positive)
