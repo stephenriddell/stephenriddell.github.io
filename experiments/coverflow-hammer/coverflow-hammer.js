@@ -1,23 +1,23 @@
 !function(w){
-  let thumbnailElements = [];
-  let spacingX; // the distance to space eachElement
-  let dimX;     //the actual width of the elements, they're all treated as though they are this, even if it is not true, users should supply equally sized elements for best experience
-  let dimY;     //height of the elements.
-  let offset; //current position?
-  let _root;
-  let count; // number of elemnts to show
-  let xform;
-  let shift; // Distance away from centre to show non-centered element
-  let dist; // how far back (z-axis) to move non-centred elements
-  let angle;
-  let target;
-  let backgroundScale;
-  let timeConstant;
+  var thumbnailElements = [];
+  var spacingX; // the distance to space eachElement
+  var dimX;     //the actual width of the elements, they're all treated as though they are this, even if it is not true, users should supply equally sized elements for best experience
+  var dimY;     //height of the elements.
+  var offset; //current position?
+  var _root;
+  var count; // number of elemnts to show
+  var xform;
+  var shift; // Distance away from centre to show non-centered element
+  var dist; // how far back (z-axis) to move non-centred elements
+  var angle;
+  var target;
+  var backgroundScale;
+  var timeConstant;
 
   w.coverflowPreview = function coverflowPreview(rootElement, opts){
     _root = rootElement;
     _root.style.position='relative';
-    for(let e of opts.thumbnails){
+    for(var e of opts.thumbnails){
       thumbnailElements.push(e);
       e.style.position = 'absolute';
       rootElement.appendChild(e);
@@ -45,7 +45,7 @@
     window.addEventListener("resize",onResize);
   };
 
-  let panStartPos;
+  var panStartPos;
   function onPanStart(ev){
       panStartPos = offset;
       onPan(ev);
@@ -62,16 +62,16 @@
     scroll(offset);
   }
 
-  let beginAutoTime;
-  let amplitude;
-  let autoReqId;
+  var beginAutoTime;
+  var amplitude;
+  var autoReqId;
   function onRelease(ev){
     target = offset;
-    let velocity=  ev.velocityX * 100;
+    var velocity=  ev.velocityX * 100;
     if(velocity > 10 || velocity < -10){
       target = offset - 0.9 * velocity
     }
-    let targetIndex = Math.round(target/spacingX);
+    var targetIndex = Math.round(target/spacingX);
     targetIndex = targetIndex < 0 ? 0 : targetIndex;
     targetIndex = targetIndex >= count ? count -1 : targetIndex;
 
@@ -86,10 +86,10 @@
 
   function autoScroll(){
     autoReqId = undefined;
-    let elapsed, delta;
+    var elapsed, delta;
     if(amplitude){
       elapsed = Date.now() - beginAutoTime;
-      let adjust =  0.008; //adjust the exponential decay function by subtracting this from it so it reaches 0
+      var adjust =  0.008; //adjust the exponential decay function by subtracting this from it so it reaches 0
                            //It is also then multiplied so that it still has a y-intercept of 1
       delta = amplitude *  (Math.exp( -elapsed / timeConstant) - adjust)/(1-adjust);
       if(delta * amplitude > 0) {
@@ -101,11 +101,11 @@
     }
   }
 
-  let rafRequestId;
+  var rafRequestId;
   function scroll(x){
     //limits
-    let maxOffset = spacingX * (count - 1) + spacingX/2 - 1;
-    let minOffset = -spacingX/2 + 1;
+    var maxOffset = spacingX * (count - 1) + spacingX/2 - 1;
+    var minOffset = -spacingX/2 + 1;
 
     offset = (typeof x === 'number') ? x : offset; //move to x
     offset = offset > maxOffset ? maxOffset : offset;
@@ -118,17 +118,17 @@
 
   function animateScroll(){
     rafRequestId = undefined;
-    let center = Math.floor((offset + spacingX / 2) / spacingX); //the image to show at the centre;
-    let delta = offset - center * spacingX; //how close to the centred the cental element is
-    let dir = (delta < 0) ? 1 : -1; //moving left or right? (left=positive)
-    let tween = -dir * delta / spacingX; //proportion between properly centered and fully rotated to show central element
+    var center = Math.floor((offset + spacingX / 2) / spacingX); //the image to show at the centre;
+    var delta = offset - center * spacingX; //how close to the centred the cental element is
+    var dir = (delta < 0) ? 1 : -1; //moving left or right? (left=positive)
+    var tween = -dir * delta / spacingX; //proportion between properly centered and fully rotated to show central element
 
     //basic centering of everything
     var alignment = 'translateX(' + (parseInt(_root.clientWidth) - dimX) / 2 + 'px) ';
     alignment += 'translateY(' + (parseInt(_root.clientHeight) - dimY) / 2 + 'px)';
 
     //central element
-    let el = thumbnailElements[center];
+    var el = thumbnailElements[center];
     el.style[xform] = alignment +
       ' translateX(' + (-delta / 2) + 'px)' + //account for off-centre
       ' translateX(' + (dir * shift * tween) + 'px)' + //partial shift from center
@@ -140,7 +140,7 @@
 
     //other elements
     //left
-    let i = 1;
+    var i = 1;
     while(center - i >= 0){
       el = thumbnailElements[center - i];
       el.style[xform] = alignment +
@@ -193,11 +193,11 @@
 }(window);
 
 !function(w){
-  let g = []; 
-  let n = 15;
+  var g = []; 
+  var n = 15;
   for(i=0;i<n;++i){
     var grey = parseInt(i*255/n);
-    let e = document.createElement("img");
+    var e = document.createElement("img");
     e.style.height='300px';
     e.style.width='175px';
     e.style.backgroundColor = `rgba(${grey},${grey},${grey},1)`;
@@ -205,7 +205,7 @@
     g.push(e);
   }
 
-  let el = document.getElementById("coverfluent");
+  var el = document.getElementById("coverfluent");
   w.coverflowPreview(el,{
     thumbnails:g,
   });
