@@ -193,21 +193,20 @@
 }(window);
 
 !function(w){
-  function* previewGenerator(n){
-    for(i=0;i<n;++i){
-      var grey = parseInt(i*255/n);
-      var e = document.createElement("img");
-      e.style.height='300px';
-      e.style.width='175px';
-      e.style.backgroundColor = `rgba(${grey},${grey},${grey},1)`;
-      e.style.border = '1px solid limegreen';
-      yield e;
-    }
+  let g = []; 
+  let n = 15;
+  for(i=0;i<n;++i){
+    var grey = parseInt(i*255/n);
+    let e = document.createElement("img");
+    e.style.height='300px';
+    e.style.width='175px';
+    e.style.backgroundColor = `rgba(${grey},${grey},${grey},1)`;
+    e.style.border = '1px solid limegreen';
+    g.push(e);
   }
 
-  let g = previewGenerator(25); 
-  let e = document.getElementById("coverfluent");
-  w.coverflowPreview(e,{
+  let el = document.getElementById("coverfluent");
+  w.coverflowPreview(el,{
     thumbnails:g,
   });
 }(window);
