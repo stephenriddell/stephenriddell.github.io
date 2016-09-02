@@ -164,7 +164,7 @@ function defValue(provided, def){
     var backgroundScale = defValue(opts.backgroundScale, 0.65);
 
     var mc = new Hammer.Manager(_root);
-    mc.add(new Hammer.Pan({threshold: 0, pointers: 0}));
+    mc.add(new Hammer.Pan({threshold: 0, pointers: 0, direction: Hammer.DIRECTION_HORIZONTAL}));
     mc.add(new Hammer.Pinch().recognizeWith(mc.get("pan")));
     mc.on("panstart panmove", onPan);
     mc.on("panend", onRelease);
