@@ -10,38 +10,43 @@ function defValue(provided, def){
     return 0.9 * newValue + 0.1*oldAverage;
   }
 
-  var kinematicDefaults = {
+  var kineticDefaults = {
     offset: 0,
     snapFn: function(x){return x;},
     restrictFn: function(x){return x;},
     autoScrollThreshold : 10,
     easingFn:function(t){
       var a = 0.008;
-      var ease = 1-(Math.exp(-t / 250) -a)/(1-a);
+      var ease = 1-(Math.exp(-t / 225) -a)/(1-a);
       if(ease > 1){
         ease = 1;
       }
       return ease;
+    },
+    moveFn(t,d){
+      return t + d;
     }
   }
 
-  w.kinematic = function kinematic(opts) {
+  w.kinetic = function kinetic(opts) {
     var offset = defValue(opts.offset, 0);
     var velocity = 0; //currently tracked control velocity
     var timestamp = Date.now(); //most recent tracked time
     var target; //target positon to move to automatically
     var amplitude; //total amount of movement in current automatic movement
     var snapFn = //function to snap to items. Identity function for no snap.
-      defValue(opts.snapFn, kinematicDefaults.snapFn);
+      defValue(opts.snapFn, kineticDefaults.snapFn);
     var restrictFn =  //function to restrict range of values
                       //(typically clamping or identity function - cylcical behaviour should be implemented by the renderer)
-      defValue(opts.restrictFn,kinematicDefaults.restrictFn);
+      defValue(opts.restrictFn,kineticDefaults.restrictFn);
     var easingFn = //easing function  for automated scrolling default exponential decay
-      defValue(opts.easingFn,kinematicDefaults.easingFn);
+      defValue(opts.easingFn,kineticDefaults.easingFn);
     var listeners =
       defValue(opts.listeners, []);
     var autoScrollThreshold = 
-      defValue(opts.autoScrollThreshold, kinematicDefaults.autoScrollThreshold);
+      defValue(opts.autoScrollThreshold, kineticDefaults.autoScrollThreshold);
+    var moveFn =
+      defValue(opts.moveFn, kineticDefaults.moveFn);
 
 
     var autoScrollFn; 
@@ -81,40 +86,56 @@ function defValue(provided, def){
       }
     }
 
-    return {
-      moveBy : function(x){
-        amplitude = 0; // manual movement - no auto movement
-        var prevOffset = offset;
-        offset = restrictFn(offset + x);
-        if(!tracking){
-          tracking = true;
-          velocity = 0;
-          timestamp = Date.now();
-          trackTicker = w.setInterval(trackVelocity,20);
-        }
-        listeners.forEach(function(l){
-          l(offset);
-        });
-      },
-      release : function() {
-        tracking = false;
-        var now = Date.now();
-        target = offset;
-        if(velocity > autoScrollThreshold || velocity < -autoScrollThreshold){
-          amplitude = 0.5 * velocity;
-          target = target + amplitude; 
-        }
-        target = snapFn(restrictFn(target));
-        amplitude = target - offset;
-        timestamp = now;
-        window.requestAnimationFrame(autoScrollFn);
-      },
-      offset: function() {
-        return offset;
+    function moveBy (x){
+      amplitude = 0; // manual movement - no auto movement
+      var prevOffset = offset;
+      offset = restrictFn(moveFn(offset, x));
+      if(!tracking){
+        tracking = true;
+        velocity = 0;
+        timestamp = Date.now();
+        trackTicker = w.setInterval(trackVelocity,20);
       }
+      listeners.forEach(function(l){
+        l(offset);
+      });
+    }
+
+    function release() {
+      tracking = false;
+      var now = Date.now();
+      target = offset;
+      if(velocity > autoScrollThreshold || velocity < -autoScrollThreshold){
+        amplitude = 0.5 * velocity;
+        target = target + amplitude; 
+      }
+      target = snapFn(restrictFn(target));
+      amplitude = target - offset;
+      timestamp = now;
+      window.requestAnimationFrame(autoScrollFn);
+    }
+
+    function stop() {
+        if(trackTicker){
+          w.clearInterval(trackTicker);
+        }
+        velocity = 0;
+        release();
+    }
+
+    function offsetFn() {
+      return offset;
+    }
+
+    return {
+      moveBy : moveBy,
+      release : release,
+      stop : stop,
+      offset : offsetFn
     }
   };
-
+}(window);
+!function(w){
   var xform = 'transform';
     ['','webkit', 'Moz', 'O', 'ms'].every(function (prefix) {
       var e = prefix + 'Transform';
@@ -144,11 +165,15 @@ function defValue(provided, def){
 
     var mc = new Hammer.Manager(_root);
     mc.add(new Hammer.Pan({threshold: 0, pointers: 0}));
+    mc.add(new Hammer.Pinch().recognizeWith(mc.get("pan")));
     mc.on("panstart panmove", onPan);
     mc.on("panend", onRelease);
+    mc.on("pinchstart", onPinchStart);
+    mc.on("pinchend", onPinchEnd);
+    mc.on("pinch", onPinch);
     window.addEventListener("resize",onResize);
 
-    var kinematic = w.kinematic({
+    var coverFlowKinetic = w.kinetic({
       listeners: [posChanged],
       restrictFn: function(x){
         if(x <= -0.5 * spacingX){
@@ -164,10 +189,31 @@ function defValue(provided, def){
       }
     });
 
+    var scaleKinetic = w.kinetic({
+      listeners: [scaleChanged],
+      restrictFn: function(x){
+        if( x < 1 ) { return 1; }
+        if( x > 2) { return 2; }
+        return x;
+      },
+      snapFn: function(x){
+        return Math.round(x);
+      },
+      moveFn: function(t,d){
+        return t * d;
+      },
+      offset: 1,
+    })
+    var scale = 1;
+
+    posChanged(coverFlowKinetic.offset());
+
     var prevPanDelta = 0;
     function onPan(ev){
-      kinematic.moveBy(-(ev.deltaX - prevPanDelta));
-      prevPanDelta = ev.deltaX;
+      if(!pinching){
+        coverFlowKinetic.moveBy(-(ev.deltaX - prevPanDelta));
+        prevPanDelta = ev.deltaX;
+      }
     }
 
     function onResize(ev){
@@ -176,7 +222,23 @@ function defValue(provided, def){
 
     function onRelease(ev){
       prevPanDelta = 0;
-      kinematic.release();
+      coverFlowKinetic.release();
+    }
+
+    var pinching = false;
+    var lastScale;
+    function onPinchStart(){
+      lastScale = 1;
+      pinching = true;
+      coverFlowKinetic.stop();
+    }
+    function onPinch(ev){
+      scaleKinetic.moveBy(ev.scale/lastScale);
+      lastScale = ev.scale;
+    }
+    function onPinchEnd(){
+      pinching = false;
+      scaleKinetic.release();
     }
 
     var offset;
@@ -184,6 +246,12 @@ function defValue(provided, def){
       offset = pos;
       render();
     }
+
+    function scaleChanged(s){
+      scale = s;
+      render();
+    }
+
 
     function render(){
       var center = Math.floor((offset + spacingX / 2) / spacingX); //the image to show at the centre;
@@ -197,12 +265,14 @@ function defValue(provided, def){
 
       //central element
       var el = thumbnailElements[center];
-      el.style[xform] = alignment +
+        var transformText = alignment +
         ' translateX(' + (-delta / 2) + 'px)' + //account for off-centre
         ' translateX(' + (dir * shift * tween) + 'px)' + //partial shift from center
         ' translateZ(' + (dist * tween) + 'px)' + //partial going backwards
         ' rotateY(' + (dir * angle * tween) + 'deg)' + //partial rotation
-        ' scale(' + (1 - (1-backgroundScale)*tween ) + ')';
+        ' scale(' + (1 - (1-backgroundScale)*tween ) * (1 + ((1-tween) * (scale - 1))) + ')';
+      el.style[xform] = transformText;
+
       el.style.zIndex = 0; //set in front of others
       el.style.opacity = 1; // set fully visible
 
@@ -244,11 +314,10 @@ function defValue(provided, def){
           ' translateX(' + (dir * shift * tween) + 'px)' + //partial shift from center
           ' translateZ(' + (dist * tween) + 'px)' + //partial going backwards
           ' rotateY(' + (dir * angle * tween) + 'deg)' + //partial rotation
-          ' scale(' + (1 - (1-backgroundScale)*tween ) + ')';
+          ' scale(' + (1 - (1-backgroundScale)*tween ) * (1 + ((1-tween) * (scale - 1))) + ')';
       }
     }
 
-    posChanged(kinematic.offset());
   };
 
 }(window);
