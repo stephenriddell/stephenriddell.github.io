@@ -163,7 +163,7 @@ function defValue(provided, def){
     var angle = defValue(opts.angle,-60);
     var backgroundScale = defValue(opts.backgroundScale, 0.65);
 
-    var mc = new Hammer.Manager(_root);
+    var mc = new Hammer.Manager(_root,{touchAction:'pan-y'});
     mc.add(new Hammer.Pan({threshold: 0, pointers: 0, direction: Hammer.DIRECTION_HORIZONTAL}));
     mc.add(new Hammer.Pinch().recognizeWith(mc.get("pan")));
     mc.on("panstart panmove", onPan);
