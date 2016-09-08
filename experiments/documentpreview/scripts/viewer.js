@@ -27,11 +27,12 @@
                 console.log(page.width);
                 console.log(page.height);
 
-                var context = canvas.getContext("2d");
                 var scale = 1;
                 var viewport = page.getViewport(scale * CSS_UNITS);
 
                 var canvas = document.createElement("canvas");
+                var context = canvas.getContext("2d");
+
                 var outputScale = getOutputScale(canvas);
                 canvas.height = viewport.height * outputScale.sy;
                 canvas.width = viewport.width * outputScale.sx;
