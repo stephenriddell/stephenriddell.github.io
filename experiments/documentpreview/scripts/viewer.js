@@ -2,7 +2,7 @@
     PDFJS.getDocument("1609.01714.pdf").then(function (pdf) {
         var pageDivs = [];
         function createPage(n) {
-            if (n >= pdf.numPages) {
+            if (n > pdf.numPages) {
                 return;
             }
             var div = document.createElement("div");
@@ -21,7 +21,7 @@
             })
             createPage(n + 1);
         }
-        createPage(0);
+        createPage(1);
         pageDivs.forEach(function (div) {
             document.body.appendChild(div);
         });
