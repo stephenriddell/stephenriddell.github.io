@@ -1,5 +1,6 @@
 /*global PDFJS:false*/
-/*eslint-env browser*/ 
+/*eslint-env browser*/
+/*eslint-env es6*/
 
 var CSS_UNITS = 96.0 / 72.0; //this is apparently a thing.
 var xform = 'transform';
@@ -154,6 +155,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             var translateText =
                 'translate3d(' + (-_position + i * width) + ',0,0)';
             _inner.children[i].style[xform] = translateText;
+            _inner.children[i].style.visibility = 'visible';
         }
     }    
 
@@ -188,19 +190,19 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             //todo: ? bind events
             _pages.push(pageView);
         }
-        var first = true;
+        var pagePromises = [];
         _pages.forEach(function (pageView) {
             var pagePromise = _pdfDocument.getPage(pageView.id);
+            pagePromises.push(pagePromise);
             var index = pageView.id - 1;
             pagePromise.then(function (page) {
                 _pages[index].page = page;
                 _pages[index].loaded = true;
                 redrawPage(_pages[index]);
-                if (first) {
-                    first = false;
-                    renderViewer();
-                }
             });
+        });
+        Promise.all(pagePromises).then(function () {
+            renderViewer();
         });
     }
 
@@ -216,6 +218,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         for (var i = 0; i < _pageCount; ++i){
             var pageContainer = document.createElement('div');
             pageContainer.classList.add('pdfviewer-pagecontainer');
+            pageContainer.style.visibility = 'hidden';
             _inner.appendChild(pageContainer);
         }
     }
