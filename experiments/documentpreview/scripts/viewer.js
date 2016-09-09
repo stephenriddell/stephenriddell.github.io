@@ -241,7 +241,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             pageContainer.removeChild(pageContainer.firstChild);
         }
 
-        var canvas = document.createElement(canvas);
+        var canvas = document.createElement('canvas');
         var viewport = pageView.page.getViewport(_scale * CSS_UNITS);
 
         var outputScale = getOutputScale(canvas);
