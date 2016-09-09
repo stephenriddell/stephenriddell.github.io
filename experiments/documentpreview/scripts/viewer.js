@@ -203,7 +203,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         _container.classList.add('pdfviewer-container');
         _inner = document.createElement('div');
         _inner.classList.add('pdfviewer-inner');
-        _inner.classList.add('pdfviewer-loading');
+        _container.appendChild(_inner);
         //todo: add mini previews?
     }
 
