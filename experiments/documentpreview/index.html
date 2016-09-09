@@ -1,12 +1,21 @@
 <html>
-    <head></head>
+    <head>
+        <link rel="stylesheet" href="base.css"/>
+    </head>
     <body>
-
+        <div id="document-viewer"></div>
 
         <script src="scripts/pdf.js" type="application/javascript"></script>
         <script type="application/javascript">
             PDFJS.workerSrc = "scripts/pdf.worker.js";
         </script>
         <script src="scripts/viewer.js" type="application/javascript"></script>
+
+        <script type="application/javascript">
+            var el = document.getElementById('document-viewer');
+            var filename = '1609.01714.pdf';
+
+            window.pdfViewer(el,filename);
+        </script>
     </body>
 </html>
