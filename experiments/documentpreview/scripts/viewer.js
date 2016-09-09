@@ -188,6 +188,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             //todo: ? bind events
             _pages.push(pageView);
         }
+        var first = true;
         _pages.forEach(function (pageView) {
             var pagePromise = _pdfDocument.getPage(pageView.id);
             var index = pageView.id - 1;
@@ -195,6 +196,10 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
                 _pages[index].page = page;
                 _pages[index].loaded = true;
                 redrawPage(_pages[index]);
+                if (first) {
+                    first = false;
+                    renderViewer();
+                }
             });
         });
     }
@@ -278,6 +283,6 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
 
     function defaultScale() {
         ///<summary>Determine a reasonable default scale based on device</summary>
-        return 0.3;
+        return 0.6;
     }
 };
