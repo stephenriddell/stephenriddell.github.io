@@ -188,14 +188,15 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             //todo: ? bind events
             _pages.push(pageView);
         }
-        for (var i = 1; i <= _pageCount; ++i){
-            var pagePromise = _pdfDocument.getPage(i);
+        _pages.forEach(function (pageView) {
+            var pagePromise = _pdfDocument.getPage(pageView.id);
+            var index = pageView.id - 1;
             pagePromise.then(function (page) {
-                _pages[i - 1].page = page;
-                _pages[i - 1].loaded = true;
-                redrawPage(_pages[i - 1]);
+                _pages[index].page = page;
+                _pages[index].loaded = true;
+                redrawPage(_pages[index]);
             });
-        }
+        });
     }
 
     function initialiseContainers() {
