@@ -153,7 +153,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         var width = _inner.firstChild.firstChild.width;
         for (var i = 0; i < _pageCount; ++i){
             var translateText =
-                'translate3d(' + (-_position + i * width) + ',0,0)';
+                'translate3d(' + (-_position + i * width) + 'px,0px,0px)';
             _inner.children[i].style[xform] = translateText;
             _inner.children[i].style.visibility = 'visible';
         }
