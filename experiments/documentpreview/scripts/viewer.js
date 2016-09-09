@@ -149,7 +149,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         //translate all of the containers to the correct position.
         //position 0 shows the first page.
         //Expect every page to have the same width.
-        var width = _inner.firstChild.width;
+        var width = _inner.firstChild.firstChild.width;
         for (var i = 0; i < _pageCount; ++i){
             var translateText =
                 'translate3d(' + (-_position + i * width) + ',0,0)';
