@@ -188,7 +188,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             //todo: ? bind events
             _pages.push(pageView);
         }
-        for (var i = 1; i <= _pageCount; ++n){
+        for (var i = 1; i <= _pageCount; ++i){
             var pagePromise = _pdfDocument.getPage(i);
             pagePromise.then(function (page) {
                 _pages[i - 1].page = page;
