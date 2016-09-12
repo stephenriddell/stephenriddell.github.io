@@ -154,8 +154,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         _pages.forEach(function (p) {
             redrawPage(p);
         });
-        _position = newPos;
-        renderViewer();
+        setPosition(newPos);
     }
 
     function clampScale(value) {
@@ -169,9 +168,21 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     }
 
     function setPosition(value) {
-        //todo limit positioning;
+        value = clampPosition(value);
         _position = value;
         renderViewer();
+    }
+
+    function clampPosition(value) {
+        var pageWidth = _inner.firstChild.firstChild.width;
+        var viewerWidth = _container.clientWidth;
+        if (value < -0.5 * viewerWidth) {
+            return -0.5 * viewerWidth;
+        }
+        if (value > _pageCount * (pageWidth + _page_gap) - viewerWidth / 2) {
+            return _pageCount * (pageWidth + _page_gap) - viewerWidth / 2;
+        }
+        return value;
     }
 
     function renderViewer() {
