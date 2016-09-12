@@ -257,7 +257,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             if (hasChild) {
                 pageContainer.removeChild(pageContainer.firstChild);
             }
-            pageContainer.style.visibility = 'visibile';
+            pageContainer.style.visibility = 'visible';
         });
     }
 
