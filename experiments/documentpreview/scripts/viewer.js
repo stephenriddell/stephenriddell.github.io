@@ -237,11 +237,11 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         var pageContainer = _inner.children[index];
 
         var canvas = document.createElement('canvas');
-        var viewport = pageView.page.getViewport(_scale * CSS_UNITS);
-
         var outputScale = getOutputScale(canvas);
-        canvas.height = viewport.height * outputScale.sy;
-        canvas.width = viewport.width * outputScale.sx;
+        var viewport = pageView.page.getViewport(_scale * CSS_UNITS * outputScale.sx);
+
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
 
         var context = canvas.getContext('2d');
         pageView.rendered = true;
