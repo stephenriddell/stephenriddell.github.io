@@ -123,7 +123,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     /** @type {number} */
     var _page_gap = 10; //pixel space between pages
 
-    var resizeEventTriggered = false;    
+    var _resizeEventTriggered = false;    
 
     initialiseContainers();
     setPdf(_uri);
@@ -293,13 +293,26 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
 
     function registerEvents() {
         window.addEventListener('resize', onResize);
+        _container.addEventListener('scroll', onScroll);
     }
 
     function onResize() {
-        if (!resizeEventTriggered) {
-            resizeEventTriggered = false;
-            window.requestAnimationFrame(renderViewer);
+        if (!_resizeEventTriggered) {
+            window.requestAnimationFrame( function () {
+                renderViewer();
+                _resizeEventTriggered = false;
+            });
         }
-        resizeEventTriggered = true;
+        _resizeEventTriggered = true;
+    }
+
+    function onScroll() {
+        if (!_resizeEventTriggered) {
+            window.requestAnimationFrame( function () {
+                renderViewer();
+                _resizeEventTriggered = false;
+            });
+        }
+        _resizeEventTriggered = true;
     }
 };
