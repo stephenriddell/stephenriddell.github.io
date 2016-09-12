@@ -145,8 +145,8 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         //set all widths of containers to max width of a container;
         var w= 0;
         _container.firstChild.childNodes.forEach(function (c) {
-            if (c.offsetWidth > w) {
-                w= c.offsetWidth;
+            if (c.firstChild && c.firstChild.width > w) {
+                w= c.width;
             }
         });
         _container.firstChild.childNodes.forEach(function (c) {
