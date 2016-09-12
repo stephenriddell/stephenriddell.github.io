@@ -5,7 +5,7 @@
 var CSS_UNITS = 96.0 / 72.0; //this is apparently a thing.
 var xform = 'transform';
 ['','webkit', 'Moz', 'O', 'ms'].every(function (prefix) {
-    var e = prefix + (!!prefix ? 'T':'t') +  'ransform';
+    var e = prefix + (prefix ? 'T':'t') +  'ransform';
     if (typeof document.body.style[e] !== 'undefined') {
         xform = e;
         return false;
@@ -114,6 +114,16 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     var _scale = defaultScale();
     /** @type {number} */
     var _position = 0;
+    /** @type {number} */
+    var _currentPage = 0;
+    /** @type {boolean} */
+    var _ready = false;
+    /** @type {number} */
+    var _min_scale = 0.1;
+    /** @type {number} */
+    var _max_scale = 10;
+    /** @type {numbe} */
+    var _page_gap = 10; //pixel space between pages
 
     initialiseContainers();
     setPdf(_uri);
@@ -135,9 +145,21 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     return _viewer;
 
     function setScale(value) {
-        //todo: limit scaling.
+        value = clampScale(value);
         _scale = value;
+        _pages.forEach(function (p) {
+            redrawPage(p);
+        });
         renderViewer();
+    }
+
+    function clampScale(value) {
+        if (value < _min_scale) {
+            return _min_scale;
+        }
+        if (value > _max_scale) {
+            return _max_scale;
+        }
     }
 
     function setPosition(value) {
@@ -153,9 +175,9 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         var width = _inner.firstChild.firstChild.width;
         for (var i = 0; i < _pageCount; ++i){
             var translateText =
-                'translate3d(' + (-_position + i * width) + 'px,0px,0px)';
+                'translate3d(' + (-_position + i * (width+_page_gap)) + 'px,0px,0px)';
             _inner.children[i].style[xform] = translateText;
-            _inner.children[i].style.visibility = 'visible';
+            _inner.children[i].style.visibility = pageInView(i) ? 'visible' : 'hidden';
         }
     }    
 
@@ -190,6 +212,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             //todo: ? bind events
             _pages.push(pageView);
         }
+        var firstPageReady = false;
         var pagePromises = [];
         _pages.forEach(function (pageView) {
             var pagePromise = _pdfDocument.getPage(pageView.id);
@@ -202,6 +225,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             });
         });
         Promise.all(pagePromises).then(function () {
+            _ready = true;
             renderViewer();
         });
     }
@@ -287,5 +311,31 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     function defaultScale() {
         ///<summary>Determine a reasonable default scale based on device</summary>
         return 0.6;
+    }
+    /**
+     * @param {EventTarget} el
+     */
+    function registerTouchEvents(el) {
+        el.addEventListener('touchStart', touchStart);
+        el.addEventListener('touchEnd', touchEnd);
+        el.addEventListener('touchCancel', touchCancel);
+        el.addEventListener('touchMove', touchMove);
+    }
+
+    /* touch controls */
+    function touchStart(ev) {
+        
+    }
+
+    function touchEnd(ev) {
+
+    }
+
+    function touchMove(ev) {
+        
+    }    
+
+    function touchCancel(ev) {
+        
     }
 };

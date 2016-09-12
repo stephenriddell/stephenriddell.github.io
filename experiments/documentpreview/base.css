@@ -1,5 +1,6 @@
 .pdfviewer-container {
     overflow-y: scroll;
+    overflow-x: hidden;
     max-width: 100%;
     max-height: 100vh;
     height: 600px;
@@ -8,6 +9,7 @@
 
 .pdfviewer-pageContainer {
     position:absolute;
+    border: 1px solid black;
 }
 
 #document-viewer {
