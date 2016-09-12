@@ -124,6 +124,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     var _page_gap = 10; //pixel space between pages
 
     var _resizeEventTriggered = false;    
+    var _pageWidth = 0;    
 
     initialiseContainers();
     setPdf(_uri);
@@ -143,12 +144,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             redrawPage(p);
         });
         //set all widths of containers to max width of a container;
-        var w= 0;
-        _container.firstChild.childNodes.forEach(function (c) {
-            if (c.firstChild && c.firstChild.width > w) {
-                w= c.firstChild.width + _page_gap;
-            }
-        });
+        var w= _pageWidth;
         _container.firstChild.childNodes.forEach(function (c) {
             c.style.minWidth = w + 'px';
         });
@@ -235,9 +231,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         //draw page if it is in view and not currently rendered or has changed scale since last render.
         if (loaded && inView && (!rendered || _scale != pageView.scale)) {
             drawPage(pageView);
-        }
-        //clear a page which is not in view, but is currently rendered;
-        if (!inView && rendered) {
+        }else{
             clearPage(pageView);
         }
     }
@@ -252,6 +246,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
 
         canvas.height = viewport.height;
         canvas.width = viewport.width;
+        _pageWidth = canvas.width;
 
         var context = canvas.getContext('2d');
         pageView.rendered = true;
@@ -282,7 +277,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     }
 
     function pageInView(index) {
-        var pageWidth = _pages[0].baseWidth * _pages[0].defaultScale; //scroll positions are not scaled as the page is
+        var pageWidth = _pageWidth; //scroll positions are not scaled as the page is
         var viewerWidth = _container.clientWidth;
         var minIndex = Math.floor(_container.scrollLeft / (pageWidth + _page_gap)) - 1; //-1 to allow an extra page to be prerendered
         var maxIndex = Math.floor((_container.scrollLeft + viewerWidth) / (pageWidth + _page_gap)) + 1; //same for the + 1
