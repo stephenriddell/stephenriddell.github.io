@@ -293,9 +293,9 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     function defaultScale(page) {
         ///<summary>Determine a reasonable default scale based on device</summary>
         if (page === undefined) {
-            return 1;
+            return 0.5;
         }
-        return window.innerWidth / (page.baseWidth * getOutputScale().sx);
+        return _container.innerWidth / (page.baseWidth * getOutputScale().sx);
     }
 
     function registerEvents() {
