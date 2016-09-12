@@ -235,9 +235,6 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     function drawPage(pageView) {
         var index = pageView.id - 1;
         var pageContainer = _inner.children[index];
-        while (pageContainer.firstChild) {
-            pageContainer.removeChild(pageContainer.firstChild);
-        }
 
         var canvas = document.createElement('canvas');
         var viewport = pageView.page.getViewport(_scale * CSS_UNITS);
@@ -254,6 +251,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         }).then(function () {
             pageContainer.classList.remove('pdfview-loading');
             pageContainer.appendChild(canvas);
+            pageContainer.removeChild(pageContainer.firstChild);
         });
     }
 
