@@ -146,10 +146,15 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
 
     function setScale(value) {
         value = clampScale(value);
+        var oldScale = _scale;
         _scale = value;
+        var factor = _scale / oldScale;
+        var width = _container.clientWidth;
+        var newPos = (_position + width) * factor - width;
         _pages.forEach(function (p) {
             redrawPage(p);
         });
+        _position = newPos;
         renderViewer();
     }
 
