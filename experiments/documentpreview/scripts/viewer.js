@@ -121,15 +121,9 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     /** @type {number} */
     var _scale = defaultScale();
     /** @type {number} */
-    var _position = 0;
-    /** @type {boolean} */
-    var _ready = false;
-    /** @type {number} */
-    var _min_scale = 0.1;
-    /** @type {number} */
-    var _max_scale = 10;
-    /** @type {number} */
     var _page_gap = 10; //pixel space between pages
+
+    var resizeEventTriggered = false;    
 
     initialiseContainers();
     setPdf(_uri);
@@ -137,70 +131,21 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     var _viewer = {
         position: function (value) {
             if (value === undefined) {
-                return _position;
+                return _container.scrollLeft;
             }
-            setPosition(value);
+            _container.scrollLeft = value;
         },
-        scale: function (value) {
-            if (value === undefined) {
-                return _scale;
-            }
-            setScale(value);
-        }
     };
     return _viewer;
 
-    function setScale(value) {
-        value = clampScale(value);
-        var oldScale = _scale;
-        _scale = value;
-        var factor = _scale / oldScale;
-        var viewerWidth = _container.clientWidth;
-        var newPos = (_position + viewerWidth/2) * factor - viewerWidth/2;
-        _pages.forEach(function (p) {
-            redrawPage(p);
-        });
-        setPosition(newPos);
-    }
-
-    function clampScale(value) {
-        if (value < _min_scale) {
-            return _min_scale;
-        }
-        if (value > _max_scale) {
-            return _max_scale;
-        }
-        return value;
-    }
-
-    function setPosition(value) {
-        value = clampPosition(value);
-        _position = value;
-        renderViewer();
-    }
-
-    function clampPosition(value) {
-        var pageWidth = _pages[0].baseWidth * _scale * getOutputScale().sx;
-        var viewerWidth = _container.clientWidth;
-        if (value < -0.5 * viewerWidth) {
-            return -0.5 * viewerWidth;
-        }
-        if (value > _pageCount * (pageWidth + _page_gap) - viewerWidth / 2) {
-            return _pageCount * (pageWidth + _page_gap) - viewerWidth / 2;
-        }
-        return value;
-    }
-
     function renderViewer() {
-        //translate all of the containers to the correct position.
-        //position 0 shows the first page.
         //Expect every page to have the same width.
         var width = _pages[0].baseWidth * _scale * getOutputScale().sx;
         _pages.forEach(function (p) {
             redrawPage(p);
             var i = p.id - 1;
             var translateText =
-                'translate3d(' + (-_position + i * (width + _page_gap)) + 'px,0px,0px)';
+                'translate3d(' + (i * (width + _page_gap)) + 'px,0px,0px)';
             _inner.children[i].style[xform] = translateText;
             _inner.children[i].style.visibility = pageInView(i) ? 'visible' : 'hidden';
         });
@@ -244,14 +189,16 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             var index = pageView.id - 1;
             /** @param {} page */
             pagePromise.then(function (page) {
-                _pages[index].baseWidth = page.getViewport(1.0*CSS_UNITS).width;
+                _pages[index].baseWidth = page.getViewport(1.0 * CSS_UNITS).width;
+                _pages[index].defaultScale = defaultScale(_pages[index]);
                 _pages[index].page = page;
                 _pages[index].loaded = true;
             });
         });
         Promise.all(pagePromises).then(function () {
-            _ready = true;
+            _scale = _pages[0].defaultScale;
             renderViewer();
+            registerEvents();
         });
     }
 
@@ -330,40 +277,29 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     function pageInView(index) {
         var pageWidth = _pages[0].baseWidth * _scale * getOutputScale().sx;
         var viewerWidth = _container.clientWidth;
-        var minIndex = Math.floor(_position / (pageWidth + _page_gap)) - 1; //-1 to allow an extra page to be prerendered
-        var maxIndex = Math.floor((_position + viewerWidth) / (pageWidth + _page_gap)) + 1; //same for the + 1
+        var minIndex = Math.floor(_container.scrollLeft / (pageWidth + _page_gap)) - 1; //-1 to allow an extra page to be prerendered
+        var maxIndex = Math.floor((_container.scrollLeft + viewerWidth) / (pageWidth + _page_gap)) + 1; //same for the + 1
 
         return index >= minIndex && index <= maxIndex;
     }
 
-    function defaultScale() {
+    function defaultScale(page) {
         ///<summary>Determine a reasonable default scale based on device</summary>
-        return 0.6;
-    }
-    /**
-     * @param {EventTarget} el
-     */
-    function registerTouchEvents(el) {
-        el.addEventListener('touchStart', touchStart);
-        el.addEventListener('touchEnd', touchEnd);
-        el.addEventListener('touchCancel', touchCancel);
-        el.addEventListener('touchMove', touchMove);
+        if (page === undefined) {
+            return 1;
+        }
+        return window.innerWidth / (page.baseWidth * getOutputScale.sx);
     }
 
-    /* touch controls */
-    function touchStart(ev) {
-        
+    function registerEvents() {
+        window.addEventListener('resize', onResize);
     }
 
-    function touchEnd(ev) {
-
-    }
-
-    function touchMove(ev) {
-        
-    }    
-
-    function touchCancel(ev) {
-        
+    function onResize() {
+        if (!resizeEventTriggered) {
+            resizeEventTriggered = false;
+            window.requestAnimationFrame(renderViewer);
+        }
+        resizeEventTriggered = true;
     }
 };

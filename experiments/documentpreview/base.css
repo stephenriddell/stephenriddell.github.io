@@ -1,7 +1,6 @@
 .pdfviewer-container {
-    overflow-y: scroll;
-    overflow-x: hidden;
-    max-width: 100%;
+    overflow: scroll;
+    max-width: 100vh;
     max-height: 100vh;
     height: 600px;
     position: relative;
