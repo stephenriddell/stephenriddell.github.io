@@ -320,6 +320,9 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     }
 
     function pageInView(index) {
+        if (!_pages[index].rendered) {
+            return false;
+        }
         var pageWidth = _inner.firstChild.firstChild.width;
         var viewerWidth = _container.clientWidth;
         var minIndex = Math.floor(_position / (pageWidth + _page_gap)) - 1; //-1 to allow an extra page to be prerendered
