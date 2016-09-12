@@ -267,6 +267,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         for (var i = 0; i < _pageCount; ++i){
             var pageContainer = document.createElement('div');
             pageContainer.classList.add('pdfviewer-pagecontainer');
+            pageContainer.classList.add('pdfviewer-loading');
             pageContainer.style.visibility = 'hidden';
             _inner.appendChild(pageContainer);
         }
