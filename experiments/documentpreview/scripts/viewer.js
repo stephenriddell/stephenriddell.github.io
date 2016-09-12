@@ -143,14 +143,14 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             redrawPage(p);
         });
         //set all widths of containers to max width of a container;
-        var width = 0;
+        var w= 0;
         _container.firstChild.childNodes.forEach(function (c) {
-            if (c.clientWidth > width) {
-                width = c.width;
+            if (c.offsetWidth > w) {
+                w= c.offsetWidth;
             }
         });
         _container.firstChild.childNodes.forEach(function (c) {
-            c.style.minWidth = width + 'px';
+            c.style.minWidth = w + 'px';
         });
     }    
 
