@@ -144,12 +144,12 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         });
         //set all widths of containers to max width of a container;
         var width = 0;
-        _container.children.forEach(function (c) {
+        _container.firstChild.childNodes.forEach(function (c) {
             if (c.clientWidth > width) {
                 width = c.width;
             }
         });
-        _container.children.forEach(function (c) {
+        _container.firstChild.childNodes.forEach(function (c) {
             c.style.minWidth = width + 'px';
         });
     }    
