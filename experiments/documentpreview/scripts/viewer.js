@@ -160,6 +160,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         if (value > _max_scale) {
             return _max_scale;
         }
+        return value;
     }
 
     function setPosition(value) {
