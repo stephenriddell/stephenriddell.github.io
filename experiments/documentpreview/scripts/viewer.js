@@ -146,7 +146,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         var w= 0;
         _container.firstChild.childNodes.forEach(function (c) {
             if (c.firstChild && c.firstChild.width > w) {
-                w= c.width;
+                w= c.firstChild.width + _page_gap;
             }
         });
         _container.firstChild.childNodes.forEach(function (c) {
