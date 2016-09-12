@@ -124,7 +124,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     var _page_gap = 10; //pixel space between pages
 
     var _resizeEventTriggered = false;    
-    var _pageWidth = 0;    
+    var _pageWidth = 0;
 
     initialiseContainers();
     setPdf(_uri);
@@ -190,6 +190,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             pagePromise.then(function (page) {
                 _pages[index].baseWidth = page.getViewport(1.0 * CSS_UNITS).width;
                 _pages[index].defaultScale = defaultScale(_pages[index]);
+                _pages[index].scale = window.devicePixelRatio;
                 _pages[index].page = page;
                 _pages[index].loaded = true;
             });
@@ -229,7 +230,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         var rendered = pageView.rendered;
         var loaded = pageView.loaded;
         //draw page if it is in view and not currently rendered or has changed scale since last render.
-        if (loaded && inView && (!rendered || _scale != pageView.scale)) {
+        if (loaded && inView && (!rendered || window.devicePixelRatio != pageView.scale)) {
             drawPage(pageView);
         }else{
             clearPage(pageView);
@@ -247,6 +248,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         canvas.height = viewport.height;
         canvas.width = viewport.width;
         _pageWidth = canvas.width;
+        pageView.scale = window.devicePixelRatio;
 
         var context = canvas.getContext('2d');
         pageView.rendered = true;
