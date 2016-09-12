@@ -195,7 +195,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         //translate all of the containers to the correct position.
         //position 0 shows the first page.
         //Expect every page to have the same width.
-        var width = _pages[0] * _scale * getOutputScale().sx;
+        var width = _pages[0].baseWidth * _scale * getOutputScale().sx;
         _pages.forEach(function (p) {
             redrawPage(p);
             var i = p.id - 1;
