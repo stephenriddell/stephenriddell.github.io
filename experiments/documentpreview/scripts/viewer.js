@@ -190,12 +190,14 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         //position 0 shows the first page.
         //Expect every page to have the same width.
         var width = _inner.firstChild.firstChild.width;
-        for (var i = 0; i < _pageCount; ++i){
+        _pages.forEach(function (p) {
+            redrawPage(p);
+            var i = p.id - 1;
             var translateText =
-                'translate3d(' + (-_position + i * (width+_page_gap)) + 'px,0px,0px)';
+                'translate3d(' + (-_position + i * (width + _page_gap)) + 'px,0px,0px)';
             _inner.children[i].style[xform] = translateText;
             _inner.children[i].style.visibility = pageInView(i) ? 'visible' : 'hidden';
-        }
+        });
     }    
 
     /**
@@ -318,11 +320,12 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     }
 
     function pageInView(index) {
-        //todo: implement properly based on scale/position/container size/page nearness.
-        if (index > -27) {
-            return true;
-        }
-        return true;
+        var pageWidth = _inner.firstChild.firstChild.width;
+        var viewerWidth = _container.clientWidth;
+        var minIndex = Math.floor(_position / (pageWidth + _page_gap)) - 1; //-1 to allow an extra page to be prerendered
+        var maxIndex = Math.floor((_position + viewerWidth) / (pageWidth + _page_gap)) + 1; //same for the + 1
+
+        return index >= minIndex && index <= maxIndex;
     }
 
     function defaultScale() {
