@@ -256,7 +256,8 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             pageContainer.appendChild(canvas);
             if (hasChild) {
                 pageContainer.removeChild(pageContainer.firstChild);
-            }    
+            }
+            pageContainer.style.visibility = 'visibile';
         });
     }
 
