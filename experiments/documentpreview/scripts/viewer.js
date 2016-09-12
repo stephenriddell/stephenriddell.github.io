@@ -149,8 +149,8 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         var oldScale = _scale;
         _scale = value;
         var factor = _scale / oldScale;
-        var width = _container.clientWidth;
-        var newPos = (_position + width) * factor - width;
+        var pageWidth = _inner.firstChild.firstChild.width;
+        var newPos = (_position + pageWidth) * factor - pageWidth;
         _pages.forEach(function (p) {
             redrawPage(p);
         });
