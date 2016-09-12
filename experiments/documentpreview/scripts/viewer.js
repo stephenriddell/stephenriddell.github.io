@@ -288,7 +288,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         if (page === undefined) {
             return 1;
         }
-        return window.innerWidth / (page.baseWidth * getOutputScale.sx);
+        return window.innerWidth / (page.baseWidth * getOutputScale().sx);
     }
 
     function registerEvents() {
