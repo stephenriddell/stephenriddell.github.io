@@ -2,13 +2,12 @@
     overflow: scroll;
     max-width: 100vh;
     max-height: 100vh;
-    height: 600px;
     position: relative;
 }
 
 .pdfviewer-pageContainer {
-    position:absolute;
     border: 1px solid black;
+    padding-right:10px;
 }
 
 #document-viewer {

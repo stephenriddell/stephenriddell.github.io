@@ -139,15 +139,8 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     return _viewer;
 
     function renderViewer() {
-        //Expect every page to have the same width.
-        var width = _pages[0].baseWidth * _scale * getOutputScale().sx;
         _pages.forEach(function (p) {
             redrawPage(p);
-            var i = p.id - 1;
-            var translateText =
-                'translate3d(' + (i * (width + _page_gap)) + 'px,0px,0px)';
-            _inner.children[i].style[xform] = translateText;
-            _inner.children[i].style.visibility = pageInView(i) ? 'visible' : 'hidden';
         });
     }    
 
