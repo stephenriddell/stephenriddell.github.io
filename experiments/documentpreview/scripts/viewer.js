@@ -306,13 +306,14 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         canvas.width = viewport.width * outputScale.sx;
 
         var context = canvas.getContext('2d');
-        pageContainer.classList.remove('pdfview-loading');
-        pageContainer.appendChild(canvas);
+        pageView.rendered = true;
         pageView.page.render({
             canvasContext: context,
             viewport: viewport
+        }).then(function () {
+            pageContainer.classList.remove('pdfview-loading');
+            pageContainer.appendChild(canvas);
         });
-        pageView.rendered = true;
     }
 
     function clearPage(pageView) {
