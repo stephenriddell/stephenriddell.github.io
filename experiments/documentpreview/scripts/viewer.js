@@ -67,6 +67,13 @@ var xform = 'transform';
 */
 
 function getOutputScale(ctx) {
+    var canvas;
+    if (ctx === undefined) {
+        if (canvas === undefined) {
+            canvas = document.createElement('canvas');
+        }
+        ctx = canvas.getContext('2d');
+    }
     var devicePixelRatio = window.devicePixelRatio || 1;
     var backingStoreRatio = ctx.webkitBackingStorePixelRatio ||
                             ctx.mozBackingStorePixelRatio ||
@@ -80,6 +87,7 @@ function getOutputScale(ctx) {
         scaled: pixelRatio !== 1
     };
 }
+
 window.pdfViewer = function pdfViewer(container, documentUri) {
     // todo:
     /// <summary>Creates a pdf viewer in the given container</summary>
@@ -114,15 +122,13 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     var _scale = defaultScale();
     /** @type {number} */
     var _position = 0;
-    /** @type {number} */
-    var _currentPage = 0;
     /** @type {boolean} */
     var _ready = false;
     /** @type {number} */
     var _min_scale = 0.1;
     /** @type {number} */
     var _max_scale = 10;
-    /** @type {numbe} */
+    /** @type {number} */
     var _page_gap = 10; //pixel space between pages
 
     initialiseContainers();
@@ -174,7 +180,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
     }
 
     function clampPosition(value) {
-        var pageWidth = _inner.firstChild.firstChild.width;
+        var pageWidth = _pages[0].baseWidth * _scale * getOutputScale().sx;
         var viewerWidth = _container.clientWidth;
         if (value < -0.5 * viewerWidth) {
             return -0.5 * viewerWidth;
@@ -189,7 +195,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         //translate all of the containers to the correct position.
         //position 0 shows the first page.
         //Expect every page to have the same width.
-        var width = _inner.firstChild.firstChild.width;
+        var width = _pages[0] * _scale * getOutputScale().sx;
         _pages.forEach(function (p) {
             redrawPage(p);
             var i = p.id - 1;
@@ -221,7 +227,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
      */
     function pdfLoaded() {
         //create pageViewObjects
-        for (var n = 1; n <= _pageCount; ++n){
+        for (var n = 1; n <= _pageCount; ++n) {
             var pageView = {
                 id: n,
                 scale: _scale,
@@ -231,16 +237,16 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             //todo: ? bind events
             _pages.push(pageView);
         }
-        var firstPageReady = false;
         var pagePromises = [];
         _pages.forEach(function (pageView) {
             var pagePromise = _pdfDocument.getPage(pageView.id);
             pagePromises.push(pagePromise);
             var index = pageView.id - 1;
+            /** @param {} page */
             pagePromise.then(function (page) {
+                _pages[index].baseWidth = page.getViewport(1.0*CSS_UNITS).width;
                 _pages[index].page = page;
                 _pages[index].loaded = true;
-                redrawPage(_pages[index]);
             });
         });
         Promise.all(pagePromises).then(function () {
@@ -323,7 +329,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         if (!_pages[index].rendered) {
             return false;
         }
-        var pageWidth = _inner.firstChild.firstChild.width;
+        var pageWidth = _pages[0].baseWidth * _scale * getOutputScale().sx;
         var viewerWidth = _container.clientWidth;
         var minIndex = Math.floor(_position / (pageWidth + _page_gap)) - 1; //-1 to allow an extra page to be prerendered
         var maxIndex = Math.floor((_position + viewerWidth) / (pageWidth + _page_gap)) + 1; //same for the + 1
