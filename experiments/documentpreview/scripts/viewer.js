@@ -250,8 +250,13 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             viewport: viewport
         }).then(function () {
             pageContainer.classList.remove('pdfview-loading');
+            if (pageContainer.firstChild) {
+                var hasChild = true;
+            }
             pageContainer.appendChild(canvas);
-            pageContainer.removeChild(pageContainer.firstChild);
+            if (hasChild) {
+                pageContainer.removeChild(pageContainer.firstChild);
+            }    
         });
     }
 
