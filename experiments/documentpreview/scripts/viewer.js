@@ -259,7 +259,7 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
             canvasContext: context,
             viewport: viewport
         }).then(function () {
-            pageContainer.classList.remove('pdfview-loading');
+            pageContainer.classList.remove('pdfviewer-loading');
             if (pageContainer.firstChild) {
                 var hasChild = true;
             }
@@ -277,12 +277,12 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         while (pageContainer.firstChild) {
             pageContainer.removeChild(pageContainer.firstChild);
         }
-        pageContainer.classList.add('pdfview-loading');
+        pageContainer.classList.add('pdfviewer-loading');
         pageView.rendered = false;
     }
 
     function pageInView(index) {
-        var pageWidth = _pages[0].baseWidth * _scale * getOutputScale().sx;
+        var pageWidth = _pages[0].baseWidth * _pages[0].defaultScale; //scroll positions are not scaled as the page is
         var viewerWidth = _container.clientWidth;
         var minIndex = Math.floor(_container.scrollLeft / (pageWidth + _page_gap)) - 1; //-1 to allow an extra page to be prerendered
         var maxIndex = Math.floor((_container.scrollLeft + viewerWidth) / (pageWidth + _page_gap)) + 1; //same for the + 1
