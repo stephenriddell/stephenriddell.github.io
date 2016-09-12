@@ -142,6 +142,16 @@ window.pdfViewer = function pdfViewer(container, documentUri) {
         _pages.forEach(function (p) {
             redrawPage(p);
         });
+        //set all widths of containers to max width of a container;
+        var width = 0;
+        _container.children.forEach(function (c) {
+            if (c.clientWidth > width) {
+                width = c.width;
+            }
+        });
+        _container.children.forEach(function (c) {
+            c.style.minWidth = width + 'px';
+        });
     }    
 
     /**
