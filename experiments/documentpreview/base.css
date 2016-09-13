@@ -1,19 +1,17 @@
-.pdfviewer-container {
+.pdfview-container {
     overflow: scroll;
     max-width: 100vh;
     max-height: 100vh;
     position: relative;
 }
 
-.pdfviewer-inner {
-    display:flex;
+.pdfview-pageContainer.pdfview-loading {
+    background-color: lightseagreen;
 }
 
-.pdfviewer-pageContainer {
+.pdfview-pageContainer {
     border: 1px solid black;
-    padding-right:10px;
-    display:inline-block;
-
+    position: absolute;
 }
 
 #document-viewer {
