@@ -54,45 +54,48 @@ function getOutputScale(ctx) {
             }
             var div = document.createElement('div');
             pageDivs.push(div);
-            pdf.getPage(n).then(function (page) {
-                var scale = 1;
-                var viewport = page.getViewport(scale * CSS_UNITS);
-
-                var canvas = document.createElement('canvas');
-                var context = canvas.getContext('2d');
-
-                var outputScale = getOutputScale(canvas);
-                if (PDFJS.maxCanvasPixels > 0) {
-                    var pixelsInViewport = viewport.width * viewport.height;
-                    var maxScale = Math.sqrt(PDFJS.maxCanvasPixels / pixelsInViewport);
-                    if (outputScale.sx > maxScale || outputScale.sy > maxScale) {
-                        outputScale.sx = maxScale;
-                        outputScale.sy = maxScale;
-                        outputScale.scaled = true;
-                        var hasRestrictedScaling = true;//TODO: use this to css transform element larger.
-                    } else {
-                        hasRestrictedScaling = false;
-                    }
-                }
+            var promise = new Promise(function (resolve, reject) {
                 
-                canvas.height = viewport.height * outputScale.sy;
-                canvas.width = viewport.width * outputScale.sx;
-                canvas.style.height = viewport.height;
-                canvas.style.width = viewport.width;
+                pdf.getPage(n).then(function (page) {
+                    var scale = 1;
+                    var viewport = page.getViewport(scale * CSS_UNITS);
 
-                div.appendChild(canvas);
-                var transform = !outputScale.scaled ? null :
-                    [outputScale.sx, 0, 0, outputScale.sy, 0, 0];
-                var renderTask = page.render({
-                    canvasContext: context,
-                    transform: transform,
-                    viewport: viewport
+                    var canvas = document.createElement('canvas');
+                    var context = canvas.getContext('2d');
+
+                    var outputScale = getOutputScale(canvas);
+                    if (PDFJS.maxCanvasPixels > 0) {
+                        var pixelsInViewport = viewport.width * viewport.height;
+                        var maxScale = Math.sqrt(PDFJS.maxCanvasPixels / pixelsInViewport);
+                        if (outputScale.sx > maxScale || outputScale.sy > maxScale) {
+                            outputScale.sx = maxScale;
+                            outputScale.sy = maxScale;
+                            outputScale.scaled = true;
+                            var hasRestrictedScaling = true;//TODO: use this to css transform element larger.
+                        } else {
+                            hasRestrictedScaling = false;
+                        }
+                    }
+                
+                    canvas.height = viewport.height * outputScale.sy;
+                    canvas.width = viewport.width * outputScale.sx;
+                    canvas.style.height = viewport.height;
+                    canvas.style.width = viewport.width;
+
+                    div.appendChild(canvas);
+                    var transform = !outputScale.scaled ? null :
+                        [outputScale.sx, 0, 0, outputScale.sy, 0, 0];
+                    page.render({
+                        canvasContext: context,
+                        transform: transform,
+                        viewport: viewport
+                    }).then(resolve(), reject());
                 });
             });
-            return renderTask;
+            return promise;
         }
         createPage(1).then(function () {
-            //createPage(2);
+            createPage(2);
         });    
         pageDivs.forEach(function (div) {
             document.body.appendChild(div);
