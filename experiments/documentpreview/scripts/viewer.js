@@ -13,58 +13,6 @@ var xform = 'transform';
     return true;
 });
 
-/*
-!function (w) {
-
-    function getOutputScale(ctx) {
-        var devicePixelRatio = window.devicePixelRatio || 1;
-        var backingStoreRatio = ctx.webkitBackingStorePixelRatio ||
-                                ctx.mozBackingStorePixelRatio ||
-                                ctx.msBackingStorePixelRatio ||
-                                ctx.oBackingStorePixelRatio ||
-                                ctx.backingStorePixelRatio || 1;
-        var pixelRatio = devicePixelRatio / backingStoreRatio;
-        return {
-            sx: pixelRatio,
-            sy: pixelRatio,
-            scaled: pixelRatio !== 1
-        };
-    }
-
-    PDFJS.getDocument('1609.01714.pdf').then(function (pdf) {
-        var pageDivs = [];
-        function createPage(n) {
-            if (n > pdf.numPages) {
-                return;
-            }
-            var div = document.createElement('div');
-            pageDivs.push(div);
-            pdf.getPage(n).then(function (page) {
-                var scale = 0.6;
-                var viewport = page.getViewport(scale * CSS_UNITS);
-
-                var canvas = document.createElement('canvas');
-                var context = canvas.getContext('2d');
-
-                var outputScale = getOutputScale(canvas);
-                canvas.height = viewport.height * outputScale.sy;
-                canvas.width = viewport.width * outputScale.sx;
-
-                div.appendChild(canvas);
-                page.render({
-                    canvasContext: context,
-                    viewport: viewport
-                });
-            });
-            createPage(n + 1);
-        }
-        createPage(1);
-        pageDivs.forEach(function (div) {
-            document.body.appendChild(div);
-        });
-    });
-} (window);
-*/
 
 function getOutputScale(ctx) {
     var canvas;
@@ -87,236 +35,40 @@ function getOutputScale(ctx) {
         scaled: pixelRatio !== 1
     };
 }
-
-window.pdfViewer = function pdfViewer(container, documentUri) {
-    // todo:
-    /// <summary>Creates a pdf viewer in the given container</summary>
-    /// <param name="container" type="HTMLElement">The container to create the pdf viewer in.</param>
-    'use strict';
-
-    if (container === null) {
-        throw 'can not create viewer in null container';
-    }
-    if (container === undefined) {
-        throw 'can not create viewer in undefined container';
-    }
-    if (!(container instanceof HTMLElement)) {
-        throw 'can not create viewer in container that is not HTMLElement';
-    }
-    /** @type HTMLElement */
-    var _container = container;
-
-    /** @type String */
-    var _uri = documentUri;
-    /** @type HTMLElement */
-    var _inner;
-    /** @type PDFPromise<PDFDocumentProxy> */
-    var _loadingTask;
-    /** @type PDFDocumentProxy */
-    var _pdfDocument;
-
-    var _pages = [];
-    /** @type {number} */
-    var _pageCount;
-    /** @type {number} */
-    var _scale = defaultScale();
-    /** @type {number} */
-    var _page_gap = 10; //pixel space between pages
-
-    var _resizeEventTriggered = false;    
-    var _pageWidth = 0;
-
-    initialiseContainers();
-    setPdf(_uri);
-
-    var _viewer = {
-        position: function (value) {
-            if (value === undefined) {
-                return _container.scrollLeft;
+!function (w) {
+    PDFJS.getDocument('1609.01714.pdf').then(function (pdf) {
+        var pageDivs = [];
+        function createPage(n) {
+            if (n > pdf.numPages) {
+                return;
             }
-            _container.scrollLeft = value;
-        },
-    };
-    return _viewer;
+            var div = document.createElement('div');
+            pageDivs.push(div);
+            pdf.getPage(n).then(function (page) {
+                var scale = 1;
+                var viewport = page.getViewport(scale * CSS_UNITS);
 
-    function renderViewer() {
-        _pages.forEach(function (p) {
-            redrawPage(p);
-        });
-        //set all widths of containers to max width of a container;
-        var w= _pageWidth;
-        _container.firstChild.childNodes.forEach(function (c) {
-            c.style.minWidth = w + 'px';
-        });
-    }    
+                var canvas = document.createElement('canvas');
+                var context = canvas.getContext('2d');
 
-    /**
-     * @param {String} uri
-     */
-    function setPdf(uri) {
-        _loadingTask = PDFJS.getDocument(uri);
-        _loadingTask.then(pdfReady);
-    }
-    /**
-     * @param {PDFDocumentProxy} pdf
-     */
-    function pdfReady(pdf) {
-        _pdfDocument = pdf;
-        _pageCount = pdf.numPages;
-        addPageContainers();
-        _pdfDocument.getDownloadInfo().then(pdfLoaded);
-    }
-    /**
-     * @param {PDFDocumentProxy} pdf
-     */
-    function pdfLoaded() {
-        //create pageViewObjects
-        for (var n = 1; n <= _pageCount; ++n) {
-            var pageView = {
-                id: n,
-                scale: _scale,
-                rendered: false,
-                loaded: false,
-            };
-            //todo: ? bind events
-            _pages.push(pageView);
-        }
-        var pagePromises = [];
-        _pages.forEach(function (pageView) {
-            var pagePromise = _pdfDocument.getPage(pageView.id);
-            pagePromises.push(pagePromise);
-            var index = pageView.id - 1;
-            /** @param {} page */
-            pagePromise.then(function (page) {
-                _pages[index].baseWidth = page.getViewport(1.0 * CSS_UNITS).width;
-                _pages[index].defaultScale = defaultScale(_pages[index]);
-                _pages[index].scale = window.devicePixelRatio;
-                _pages[index].page = page;
-                _pages[index].loaded = true;
+                var outputScale = getOutputScale(canvas);
+                canvas.height = viewport.height * outputScale.sy;
+                canvas.width = viewport.width * outputScale.sx;
+
+                div.appendChild(canvas);
+                var transform = !outputScale.scaled ? null :
+                    [outputScale.sx, 0, 0, outputScale.sy, 0, 0];
+                page.render({
+                    canvasContext: context,
+                    transform: transform,
+                    viewport: viewport
+                });
             });
+            createPage(n + 1);
+        }
+        createPage(1);
+        pageDivs.forEach(function (div) {
+            document.body.appendChild(div);
         });
-        Promise.all(pagePromises).then(function () {
-            _scale = _pages[0].defaultScale;
-            renderViewer();
-            registerEvents();
-        });
-    }
-
-    function initialiseContainers() {
-        _container.classList.add('pdfviewer-container');
-        _inner = document.createElement('div');
-        _inner.classList.add('pdfviewer-inner');
-        _container.appendChild(_inner);
-        //todo: add mini previews?
-    }
-
-    function addPageContainers() {
-        for (var i = 0; i < _pageCount; ++i){
-            var pageContainer = document.createElement('div');
-            pageContainer.classList.add('pdfviewer-pagecontainer');
-            pageContainer.classList.add('pdfviewer-loading');
-            pageContainer.style.visibility = 'hidden';
-            _inner.appendChild(pageContainer);
-        }
-    }
-
-    function redrawPage(pageView) {
-        var index = pageView.id - 1;
-        var pageContainer = _inner.children[index];
-        if (pageContainer === undefined) {
-            throw 'can not redraw, not properly initialised';
-        }
-        var inView = pageInView(index);
-        var rendered = pageView.rendered;
-        var loaded = pageView.loaded;
-        //draw page if it is in view and not currently rendered or has changed scale since last render.
-        if (loaded && inView && (!rendered || window.devicePixelRatio != pageView.scale)) {
-            drawPage(pageView);
-        }else{
-            clearPage(pageView);
-        }
-    }
-
-    function drawPage(pageView) {
-        var index = pageView.id - 1;
-        var pageContainer = _inner.children[index];
-
-        var canvas = document.createElement('canvas');
-        var outputScale = getOutputScale(canvas);
-        var viewport = pageView.page.getViewport(_scale * CSS_UNITS * outputScale.sx);
-
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        _pageWidth = canvas.width;
-        pageView.scale = window.devicePixelRatio;
-
-        var context = canvas.getContext('2d');
-        pageView.rendered = true;
-        pageView.page.render({
-            canvasContext: context,
-            viewport: viewport
-        }).then(function () {
-            pageContainer.classList.remove('pdfviewer-loading');
-            if (pageContainer.firstChild) {
-                var hasChild = true;
-            }
-            pageContainer.appendChild(canvas);
-            if (hasChild) {
-                pageContainer.removeChild(pageContainer.firstChild);
-            }
-            pageContainer.style.visibility = 'visible';
-        });
-    }
-
-    function clearPage(pageView) {
-        var index = pageView.id - 1;
-        var pageContainer = _inner.children[index];
-        while (pageContainer.firstChild) {
-            pageContainer.removeChild(pageContainer.firstChild);
-        }
-        pageContainer.classList.add('pdfviewer-loading');
-        pageView.rendered = false;
-    }
-
-    function pageInView(index) {
-        var pageWidth = _pageWidth; //scroll positions are not scaled as the page is
-        var viewerWidth = _container.clientWidth;
-        var minIndex = Math.floor(_container.scrollLeft / (pageWidth + _page_gap)) - 1; //-1 to allow an extra page to be prerendered
-        var maxIndex = Math.floor((_container.scrollLeft + viewerWidth) / (pageWidth + _page_gap)) + 1; //same for the + 1
-
-        return index >= minIndex && index <= maxIndex;
-    }
-
-    function defaultScale(page) {
-        ///<summary>Determine a reasonable default scale based on device</summary>
-        if (page === undefined) {
-            return 0.5;
-        }
-        return _container.clientWidth / (page.baseWidth * getOutputScale().sx);
-    }
-
-    function registerEvents() {
-        window.addEventListener('resize', onResize);
-        _container.addEventListener('scroll', onScroll);
-    }
-
-    function onResize() {
-        if (!_resizeEventTriggered) {
-            window.requestAnimationFrame( function () {
-                renderViewer();
-                _resizeEventTriggered = false;
-            });
-        }
-        _resizeEventTriggered = true;
-    }
-
-    function onScroll() {
-        if (!_resizeEventTriggered) {
-            window.requestAnimationFrame( function () {
-                renderViewer();
-                _resizeEventTriggered = false;
-            });
-        }
-        _resizeEventTriggered = true;
-    }
-};
+    });
+} (window);
