@@ -27,7 +27,7 @@ function getOutputScale(ctx) {
                             ctx.mozBackingStorePixelRatio ||
                             ctx.msBackingStorePixelRatio ||
                             ctx.oBackingStorePixelRatio ||
-                            ctx.backingStorePixelRatio || 1;
+                            ctx.backingStorePixelRatio || 1; //backing store ratio is deprecated and will likely always be 1.
     var pixelRatio = devicePixelRatio / backingStoreRatio;
     return {
         sx: pixelRatio,
@@ -54,6 +54,8 @@ function getOutputScale(ctx) {
                 var outputScale = getOutputScale(canvas);
                 canvas.height = viewport.height * outputScale.sy;
                 canvas.width = viewport.width * outputScale.sx;
+                canvas.style.height = viewport.height;
+                canvas.style.width = viewport.width;
 
                 div.appendChild(canvas);
                 var transform = !outputScale.scaled ? null :
