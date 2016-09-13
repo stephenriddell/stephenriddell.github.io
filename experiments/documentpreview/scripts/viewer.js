@@ -69,7 +69,7 @@ function getOutputScale(ctx) {
                         outputScale.sx = maxScale;
                         outputScale.sy = maxScale;
                         outputScale.scaled = true;
-                        var hasRestrictedScaling = true;
+                        var hasRestrictedScaling = true;//TODO: use this to css transform element larger.
                     } else {
                         hasRestrictedScaling = false;
                     }
@@ -79,7 +79,7 @@ function getOutputScale(ctx) {
                 canvas.width = viewport.width * outputScale.sx;
                 canvas.style.height = viewport.height;
                 canvas.style.width = viewport.width;
-                
+
                 div.appendChild(canvas);
                 var transform = !outputScale.scaled ? null :
                     [outputScale.sx, 0, 0, outputScale.sy, 0, 0];
@@ -87,11 +87,14 @@ function getOutputScale(ctx) {
                     canvasContext: context,
                     transform: transform,
                     viewport: viewport
+                }).then(function () {
+                    //createPage(n + 1);
                 });
             });
-            createPage(n + 1);
+            return;
         }
         createPage(1);
+        createPage(2);
         pageDivs.forEach(function (div) {
             document.body.appendChild(div);
         });
