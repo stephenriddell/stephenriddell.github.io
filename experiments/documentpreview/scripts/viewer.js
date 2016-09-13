@@ -95,10 +95,12 @@ function getOutputScale(ctx) {
             return promise;
         }
         createPage(1).then(function () {
-            createPage(2);
+            createPage(2)
+                .then(function () {
+                    pageDivs.forEach(function (div) {
+                        document.body.appendChild(div);
+                    });
+                });
         });    
-        pageDivs.forEach(function (div) {
-            document.body.appendChild(div);
-        });
     });
 } (window);
