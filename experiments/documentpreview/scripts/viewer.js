@@ -83,18 +83,17 @@ function getOutputScale(ctx) {
                 div.appendChild(canvas);
                 var transform = !outputScale.scaled ? null :
                     [outputScale.sx, 0, 0, outputScale.sy, 0, 0];
-                page.render({
+                var renderTask = page.render({
                     canvasContext: context,
                     transform: transform,
                     viewport: viewport
-                }).then(function () {
-                    //createPage(n + 1);
                 });
             });
-            return;
+            return renderTask;
         }
-        createPage(1);
-        createPage(2);
+        createPage(1).then(function () {
+            //createPage(2);
+        });    
         pageDivs.forEach(function (div) {
             document.body.appendChild(div);
         });
