@@ -13,6 +13,16 @@ var xform = 'transform';
     return true;
 });
 
+function getPixelRatio() {
+    //On mobile devices this is the ratio css pixel height / device pixel height, whilst at 1.0 scale
+    //On desktop devices this is typically the current scale.
+    var dpr = window.devicePixelRatio || 1;
+    //On mobile devices this adequately measures scale on a page using viewport width=device-width.
+    //On desktop devices it is 1 (or slightly less to compensate for a scroll bar.)
+    var scale = (document.documentElement.clientWidth / window.innerWidth) || 1;
+    scale = scale < 1 ? 1 : scale;
+    return dpr * scale;
+}
 
 function getOutputScale(ctx) {
     var canvas;
@@ -22,7 +32,7 @@ function getOutputScale(ctx) {
         }
         ctx = canvas.getContext('2d');
     }
-    var devicePixelRatio = window.devicePixelRatio || 1;
+    var devicePixelRatio = getPixelRatio();
     var backingStoreRatio = ctx.webkitBackingStorePixelRatio ||
                             ctx.mozBackingStorePixelRatio ||
                             ctx.msBackingStorePixelRatio ||
