@@ -62,11 +62,24 @@ function getOutputScale(ctx) {
                 var context = canvas.getContext('2d');
 
                 var outputScale = getOutputScale(canvas);
+                if (PDFJS.maxCanvasPixels > 0) {
+                    var pixelsInViewport = viewport.width * viewport.height;
+                    var maxScale = Math.sqrt(PDFJS.maxCanvasPixels / pixelsInViewport);
+                    if (outputScale.sx > maxScale || outputScale.sy > maxScale) {
+                        outputScale.sx = maxScale;
+                        outputScale.sy = maxScale;
+                        outputScale.scaled = true;
+                        var hasRestrictedScaling = true;
+                    } else {
+                        hasRestrictedScaling = false;
+                    }
+                }
+                
                 canvas.height = viewport.height * outputScale.sy;
                 canvas.width = viewport.width * outputScale.sx;
                 canvas.style.height = viewport.height;
                 canvas.style.width = viewport.width;
-
+                
                 div.appendChild(canvas);
                 var transform = !outputScale.scaled ? null :
                     [outputScale.sx, 0, 0, outputScale.sy, 0, 0];
