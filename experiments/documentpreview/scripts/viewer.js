@@ -3,7 +3,6 @@
 /*eslint-env es6*/
 !function PDFViewClosure() {
     'use strict';
-    var CSS_UNITS = 96.0 / 72.0; //this is apparently a thing.
     var xform = 'transform';
     ['', 'webkit', 'Moz', 'O', 'ms'].every(function (prefix) {
         var e = prefix + (prefix ? 'T' : 't') + 'ransform';
@@ -46,6 +45,7 @@
             scaled: pixelRatio !== 1
         };
     }
+    /*
     !function () {
         PDFJS.getDocument('1609.01714.pdf').then(function (pdf) {
             var pageDivs = [];
@@ -104,8 +104,11 @@
             });
         });
     } ();
+    */
 
     window.PdfView = function PdfView(container, pdfLocation) {
+        var page_gap = 10;
+
         var pdfViewModel = {
             pages: [],
             scale: scale,
@@ -116,30 +119,57 @@
         var _position = { x: 0, y: 0 };
 
         container.style.postion = 'relative';
+        var finalPageInitialisedResolve;
+        var promise = new Promise(function (resolve) {
+            finalPageInitialisedResolve = resolve;
+        });
         PDFJS.getDocument(pdfLocation).then(function (pdf) {
-            var finalPageInitialisedResolve;
-            var promise = new Promise(function (resolve) {
-                finalPageInitialisedResolve = resolve;
-            });
             var totalWidth = 0;
             function initPage(pageNum) {
                 if (pageNum === pdf.numPages){
-                    finalPageInitialisedResolve();
+                    finalPageInitialisedResolve(pdfViewModel);
                     return;
                 }
                 pdf.getPage(pageNum).then(function (page) { 
                     var pageView = PdfPageView(page);
+                    pageView.pageNo = pageNum;
                     pageView.baseTotalPrevPagesWidth = totalWidth;
                     totalWidth += pageView.baseSize.w;
                     pdfViewModel.pages.push(pageView);
+                    pdfViewModel.container.appendChild(page.div);
+                    initPage(pageNum + 1);
                 });
             }
             initPage(0);
         });
 
+        function render() {
+            var pages = pdfViewModel.pages;
+            var scale = _scale;
+            pages.forEach(function (page) {
+                page.scale(scale);
+                var index = page.pageNo;
+                var x = scale * page.baseTotalPrevPagesWidth + index * page_gap - _position.x;
+                x = -x;
+                var y = scale * _position.y;
+                y = -y;
+                var transformText = 'translate( ' + x + 'px, ' + y + ' )';
+                page.div.style[xform] = transformText;
+
+                var inView = false;
+                if (x + page.baseSize * scale > 0 //the right of the page is not to the left of the container
+                    && x < pdfViewModel.container.width //the left of the page is not to the right of the container
+                ) {
+                    inView = true;
+                }
+                page.onMove(inView); //trigger the page to hide/draw itself if necessary
+            });
+        }        
+
         function scale(value) {
             if (value) {
                 _scale = value;
+                render();
                 return;    
             }
             return _scale;
@@ -152,6 +182,7 @@
                 if (value.y) {
                     _position.y = value.y;
                 }
+                render();
             }
             return {
                 x: _position.x,
@@ -159,7 +190,9 @@
             };
         }
 
-        return pdfViewModel;
+        var zres = ZoomResizeEventSource();
+        zres.start();
+        return promise;
     };
 
     function PdfPageView(pdfPage) {
@@ -193,6 +226,7 @@
             inView: false,
         };
 
+
         function onMove(inView) {
             if (inView === pageView.inView) {
                 //page hasn't moved in or out of view, but might have rescaled enough to redraw.
@@ -206,8 +240,21 @@
                     return;
                 }
                 var newScale = pageView.scale() * getOutputScale(pageView.context);
-                if (newScale / pageView.renderScale > 1.3 || pageView.renderScale / newScale > 1.3) {
+                if (newScale / pageView.renderScale > 1.3
+                    || pageView.renderScale / newScale > 1.3) {
                     render();
+                } else {
+                    //ensure that current size is correct.
+                    var canvas = pageView.canvas;
+                    var viewport = pageView.viewport;
+                    var scale = pageView.scale();
+                    var height = viewport.height * scale / pageView.renderScale;
+                    var width = viewport.width * scale / pageView.renderScale;
+                    canvas.style.height = height + 'px';
+                    canvas.style.width = width + 'px';
+                    pageView.size.h = height;
+                    pageView.size.w = width;
+
                 }
             }
             //has changed visibility;
@@ -232,8 +279,8 @@
             pageView.renderStatus = RENDER_RUNNING;
             var scale = pageView.scale;
             var page = pageView.pdfPage;
-            var viewport = page.getViewport(scale * CSS_UNITS);
-
+            var viewport = page.getViewport(scale);
+            pageView.viewport = viewport;
             var canvas = document.createElement('canvas');
             pageView.canvas = canvas;
             var context = canvas.getContext('2d');
