@@ -281,6 +281,7 @@
             pageView.viewport = viewport;
             var canvas = document.createElement('canvas');
             pageView.canvas = canvas;
+            pageView.div.appendChild(canvas);
             var context = canvas.getContext('2d');
             pageView.context = context;
 
