@@ -119,6 +119,8 @@
         var _position = { x: 0, y: 0 };
 
         container.style.postion = 'relative';
+        container.style.overflow = 'hidden';
+        container.style.pespective = '500px';
         var finalPageInitialisedResolve;
         var promise = new Promise(function (resolve) {
             finalPageInitialisedResolve = resolve;
@@ -241,7 +243,7 @@
                 if (newScale / pageView.renderScale > 1.3
                     || pageView.renderScale / newScale > 1.3) {
                     render();
-                } else {
+                } else if(inView && pageView.canvas) {
                     //ensure that current size is correct.
                     var canvas = pageView.canvas;
                     var viewport = pageView.viewport;
