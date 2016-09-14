@@ -275,7 +275,7 @@
         function render() {
             reset();
             pageView.renderStatus = RENDER_RUNNING;
-            var scale = pageView.scale;
+            var scale = pageView._scale;
             var page = pageView.pdfPage;
             var viewport = page.getViewport(scale);
             pageView.viewport = viewport;
