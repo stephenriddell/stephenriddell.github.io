@@ -152,7 +152,7 @@
                 var index = page.pageNo;
                 var x = scale * page.baseTotalPrevPagesWidth + index * page_gap - _position.x;
                 var y = scale * (-_position.y);
-                var transformText = 'translate( ' + x + 'px, ' + y + ' )';
+                var transformText = 'translate( ' + x + 'px, ' + y + 'px )';
                 page.div.style[xform] = transformText;
 
                 var inView = false;
