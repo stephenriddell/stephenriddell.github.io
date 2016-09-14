@@ -175,10 +175,10 @@
         }
         function position(value) {
             if (value) {
-                if (value.x) {
+                if (value.x !== undefined) {
                     _position.x = value.x;
                 }
-                if (value.y) {
+                if (value.y !== undefined) {
                     _position.y = value.y;
                 }
                 render();
