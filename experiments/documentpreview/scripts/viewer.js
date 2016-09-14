@@ -130,7 +130,7 @@
                     finalPageInitialisedResolve(pdfViewModel);
                     return;
                 }
-                pdf.getPage(pageNum).then(function (page) { 
+                pdf.getPage(pageNum+1).then(function (page) { 
                     var pageView = PdfPageView(page);
                     pageView.pageNo = pageNum;
                     pageView.baseTotalPrevPagesWidth = totalWidth;

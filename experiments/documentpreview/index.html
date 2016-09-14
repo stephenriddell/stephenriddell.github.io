@@ -15,7 +15,9 @@
             var el = document.getElementById('document-viewer');
             var filename = '1609.01714.pdf';
 
-            window.viewer = window.PdfView(el,filename);
+            window.PdfView(el,filename).then(function(v)){
+                window.viewer = v;
+            }
         </script>
     </body>
 </html>
