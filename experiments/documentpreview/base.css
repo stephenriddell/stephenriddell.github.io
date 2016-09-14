@@ -16,7 +16,9 @@
 
 #document-viewer {
     max-width: 650px;
+    height:800px;
     margin:auto;
+    background-color:cyan;
 }
 
 body {

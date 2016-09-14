@@ -115,7 +115,7 @@
             position: position,
             container: container,
         };
-        var _scale = 0;
+        var _scale = 1;
         var _position = { x: 0, y: 0 };
 
         container.style.postion = 'relative';
@@ -136,7 +136,7 @@
                     pageView.baseTotalPrevPagesWidth = totalWidth;
                     totalWidth += pageView.baseSize.w;
                     pdfViewModel.pages.push(pageView);
-                    pdfViewModel.container.appendChild(page.div);
+                    pdfViewModel.container.appendChild(pageView.div);
                     initPage(pageNum + 1);
                 });
             }
