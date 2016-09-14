@@ -3,6 +3,7 @@
 /*eslint-env es6*/
 !function PDFViewClosure() {
     'use strict';
+    var page_gap = 10;
     var xform = 'transform';
     ['', 'webkit', 'Moz', 'O', 'ms'].every(function (prefix) {
         var e = prefix + (prefix ? 'T' : 't') + 'ransform';
@@ -106,8 +107,40 @@
     } ();
     */
 
+    window.PdfViewController = function PdfViewController(pdfViewPromise) {
+        var pdfView;
+        pdfViewPromise.then(function (pdfViewModel) {
+            pdfView = pdfViewModel;
+            var kinetic = window.kinetic({
+                listeners: [xposChanged],
+                restrictFn: function (x) {
+                    if (x < 0) {
+                        return 0;
+                    }
+                    var finalPage = pdfView.pages[pdfView.pages.length];
+                    var max = finalPage.baseTotalPrevPagesWidth
+                        + finalPage.baseSize.w
+                        + (pdfView.pages.length - 1) * page_gap
+                        - pdfView.container.clientWidth;
+                    if (x > max) {
+                        return max;
+                    }
+                    return x;
+                }
+            });
+        });
+
+        function xposChanged(pos) {
+            pdfView.position({ x: pos });
+        }
+
+        var prevPanDelta = { x: 0, y: 0 };
+        function onPan() {
+            
+        }
+    };
+
     window.PdfView = function PdfView(container, pdfLocation) {
-        var page_gap = 10;
 
         var pdfViewModel = {
             pages: [],
@@ -244,7 +277,7 @@
                 if (newScale / pageView.renderScale > 1.3
                     || pageView.renderScale / newScale > 1.3) {
                     render();
-                } else if(inView && pageView.canvas) {
+                } else if (inView && pageView.canvas) {
                     //ensure that current size is correct.
                     var canvas = pageView.canvas;
                     var viewport = pageView.viewport;
@@ -257,13 +290,14 @@
                     pageView.size.w = width;
 
                 }
-            }
-            //has changed visibility;
-            pageView.inView = inView;
-            if (pageView.inView) {
-                render();
             } else {
-                reset();
+                //has changed visibility;
+                pageView.inView = inView;
+                if (pageView.inView) {
+                    render();
+                } else {
+                    reset();
+                }
             }
         }
 
@@ -296,9 +330,6 @@
                     outputScale.sx = maxScale;
                     outputScale.sy = maxScale;
                     outputScale.scaled = true;
-                    var hasRestrictedScaling = true;//TODO: use this to css element to be larger
-                } else {
-                    hasRestrictedScaling = false;
                 }
             }
 
