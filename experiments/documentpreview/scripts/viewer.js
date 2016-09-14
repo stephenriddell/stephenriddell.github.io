@@ -150,14 +150,12 @@
                 page.scale(scale);
                 var index = page.pageNo;
                 var x = scale * page.baseTotalPrevPagesWidth + index * page_gap - _position.x;
-                x = -x;
-                var y = scale * _position.y;
-                y = -y;
+                var y = scale * (-_position.y);
                 var transformText = 'translate( ' + x + 'px, ' + y + ' )';
                 page.div.style[xform] = transformText;
 
                 var inView = false;
-                if (x + page.baseSize * scale > 0 //the right of the page is not to the left of the container
+                if (x + page.baseSize.w * scale > 0 //the right of the page is not to the left of the container
                     && x < pdfViewModel.container.width //the left of the page is not to the right of the container
                 ) {
                     inView = true;
