@@ -118,9 +118,8 @@
         var _scale = 1;
         var _position = { x: 0, y: 0 };
 
-        container.style.postion = 'relative';
+        container.style.position = 'relative';
         container.style.overflow = 'hidden';
-        container.style.pespective = '500px';
         var finalPageInitialisedResolve;
         var promise = new Promise(function (resolve) {
             finalPageInitialisedResolve = resolve;
