@@ -129,7 +129,7 @@
             function initPage(pageNum) {
                 if (pageNum === pdf.numPages){
                     finalPageInitialisedResolve(pdfViewModel);
-                    document.addEventListener('resize', render);
+                    window.addEventListener('resize', render);
                     return;
                 }
                 pdf.getPage(pageNum+1).then(function (page) { 
