@@ -156,7 +156,7 @@
 
                 var inView = false;
                 if (x + page.baseSize.w * scale > 0 //the right of the page is not to the left of the container
-                    && x < pdfViewModel.container.width //the left of the page is not to the right of the container
+                    && x < pdfViewModel.container.clientWidth //the left of the page is not to the right of the container
                 ) {
                     inView = true;
                 }
