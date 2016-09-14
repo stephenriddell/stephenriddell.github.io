@@ -128,8 +128,9 @@
             var totalWidth = 0;
             function initPage(pageNum) {
                 if (pageNum === pdf.numPages){
-                    finalPageInitialisedResolve(pdfViewModel);
                     window.addEventListener('resize', render);
+                    render();
+                    finalPageInitialisedResolve(pdfViewModel);
                     return;
                 }
                 pdf.getPage(pageNum+1).then(function (page) { 
