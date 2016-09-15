@@ -376,7 +376,7 @@
             function renderComplete(error) {
                 pageView.div.appendChild(canvas);
                 pageView.canvas.removeAttribute('hidden');
-                if (oldCanvas) {
+                if (oldCanvas && oldCanvas.parentElement === pageView.div) {
                     pageView.div.removeChild(oldCanvas);
                 }    
                 if (pageView.renderTask === renderTask) {
@@ -411,7 +411,9 @@
             pageView.renderStatus = RENDER_INIT;
         
             if (pageView.div && pageView.canvas && !leaveOldCanvas) {
-                pageView.div.removeChild(pageView.canvas);
+                if (pageView.canvas.parentElement === pageView.div) {
+                    pageView.div.removeChild(pageView.canvas);
+                }    
                 pageView.div.classList.add(CLASS_LOADING);
                 delete pageView.canvas;
             }
