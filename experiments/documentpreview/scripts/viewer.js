@@ -151,8 +151,7 @@
         var _scale = 1;
         var _position = { x: 0, y: 0 };
 
-        container.style.position = 'relative';
-        container.style.overflow = 'hidden';
+        container.classList.add('pdfview-container');
         var finalPageInitialisedResolve;
         var promise = new Promise(function (resolve) {
             finalPageInitialisedResolve = resolve;
