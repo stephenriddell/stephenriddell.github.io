@@ -161,6 +161,7 @@
             function initPage(pageNum) {
                 if (pageNum === pdf.numPages){
                     window.addEventListener('resize', render);
+                    container.addEventListener('scroll', render);
                     render();
                     finalPageInitialisedResolve(pdfViewModel);
                     return;
@@ -178,7 +179,19 @@
             initPage(0);
         });
 
+        var renderQueued = false;
         function render() {
+            if (renderQueued) {
+                return;
+            }
+            renderQueued = true;
+            window.requestAnimationFrame(function () {
+                renderWork();
+                renderQueued = false;
+            });
+        }
+        
+        function renderWork() {
             var pages = pdfViewModel.pages;
             var scale = _scale;
             pages.forEach(function (page) {
@@ -310,6 +323,7 @@
             pageView.baseSize.h = vp.height;
             pageView.div = document.createElement('div');
             pageView.div.classList.add(CLASS_DIV);
+            pageView.div.classList.add(CLASS_LOADING);
         }
 
         function render() {
