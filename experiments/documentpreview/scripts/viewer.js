@@ -375,7 +375,10 @@
 
             function renderComplete(error) {
                 pageView.div.appendChild(canvas);
-                pageView.div.removeChild(oldCanvas);
+                pageView.canvas.removeAttribute('hidden');
+                if (oldCanvas) {
+                    pageView.div.removeChild(oldCanvas);
+                }    
                 if (pageView.renderTask === renderTask) {
                     pageView.renderTask = null;
                 }
@@ -384,7 +387,6 @@
                     return;
                 }
                 pageView.renderStatus = RENDER_COMPLETE;
-                pageView.canvas.removeAttribute('hidden');
                 pageView.div.classList.remove(CLASS_LOADING);
                 resolveRenderPromise();
             }
