@@ -17,7 +17,7 @@
 #document-viewer {
     width: 100%;
     height: 450px;
-    max-width:100vh;
+    max-width:100vw;
     max-height:100vh;
     margin:auto;
     background-color:cyan;
