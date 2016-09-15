@@ -378,13 +378,11 @@
             });
 
             function renderComplete(error) {
+                while (pageView.div.firstChild) {
+                    pageView.div.remove(pageView.div.firstChild);
+                }
                 pageView.div.appendChild(canvas);
-                if (pageView.canvas) {
-                    pageView.canvas.removeAttribute('hidden');
-                }    
-                if (oldCanvas && oldCanvas.parentElement === pageView.div) {
-                    pageView.div.removeChild(oldCanvas);
-                }    
+                canvas.removeAttribute('hidden');
                 if (pageView.renderTask === renderTask) {
                     pageView.renderTask = null;
                 }
