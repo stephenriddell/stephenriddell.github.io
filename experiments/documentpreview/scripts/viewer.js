@@ -162,7 +162,7 @@
                 if (pageNum === pdf.numPages){
                     window.addEventListener('resize', render);
                     container.addEventListener('scroll', render);
-                    pdfViewModel.scale = getDefaultScale();
+                    pdfViewModel.scale(getDefaultScale());
                     render();
                     finalPageInitialisedResolve(pdfViewModel);
                     return;
