@@ -375,7 +375,9 @@
 
             function renderComplete(error) {
                 pageView.div.appendChild(canvas);
-                pageView.canvas.removeAttribute('hidden');
+                if (pageView.canvas) {
+                    pageView.canvas.removeAttribute('hidden');
+                }    
                 if (oldCanvas && oldCanvas.parentElement === pageView.div) {
                     pageView.div.removeChild(oldCanvas);
                 }    
