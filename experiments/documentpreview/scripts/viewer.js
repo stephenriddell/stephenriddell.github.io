@@ -350,7 +350,7 @@
                 }
             }
 
-            pageView.renderScale = scale * outputScale.sx;
+            pageView.renderScale = scale;
             canvas.height = viewport.height * outputScale.sy;
             canvas.width = viewport.width * outputScale.sx;
             canvas.style.height = viewport.height + 'px';
