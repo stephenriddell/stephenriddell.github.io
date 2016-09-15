@@ -106,7 +106,7 @@
         });
     } ();
     */
-
+/*
     window.PdfViewController = function PdfViewController(pdfViewPromise) {
         var pdfView;
         pdfViewPromise.then(function (pdfViewModel) {
@@ -135,11 +135,11 @@
         }
 
         var prevPanDelta = { x: 0, y: 0 };
-        function onPan() {
+        function onPan(ev) {
             
         }
     };
-
+*/
     window.PdfView = function PdfView(container, pdfLocation) {
 
         var pdfViewModel = {
@@ -191,8 +191,9 @@
                 page.div.style[xform] = transformText;
 
                 var inView = false;
-                if (x + page.baseSize.w * scale > 0 //the right of the page is not to the left of the container
-                    && x < pdfViewModel.container.clientWidth //the left of the page is not to the right of the container
+                var container = pdfViewModel.container;
+                if (x + page.baseSize.w * scale > container.scrollLeft //the right of the page is not to the left of the container
+                    && x < container.scrollLeft + container.clientWidth //the left of the page is not to the right of the container
                 ) {
                     inView = true;
                 }
