@@ -327,15 +327,15 @@
         }
 
         function render() {
-            reset();
+            reset(true);
             pageView.renderStatus = RENDER_RUNNING;
             var scale = pageView.scale();
             var page = pageView.pdfPage;
             var viewport = page.getViewport(scale);
             pageView.viewport = viewport;
             var canvas = document.createElement('canvas');
+            var oldCanvas = pageView.canvas;
             pageView.canvas = canvas;
-            pageView.div.appendChild(canvas);
             var context = canvas.getContext('2d');
             pageView.context = context;
 
@@ -374,6 +374,8 @@
             });
 
             function renderComplete(error) {
+                pageView.div.appendChild(canvas);
+                pageView.div.removeChild(oldCanvas);
                 if (pageView.renderTask === renderTask) {
                     pageView.renderTask = null;
                 }
@@ -396,7 +398,7 @@
             return promise;
         }
 
-        function reset() {
+        function reset(leaveOldCanvas) {
             if (pageView.renderTask && (
                 pageView.renderStatus === RENDER_RUNNING
                 || pageView.renderStatus === RENDER_INIT
@@ -406,7 +408,7 @@
             }
             pageView.renderStatus = RENDER_INIT;
         
-            if (pageView.div && pageView.canvas) {
+            if (pageView.div && pageView.canvas && !leaveOldCanvas) {
                 pageView.div.removeChild(pageView.canvas);
                 pageView.div.classList.add(CLASS_LOADING);
                 delete pageView.canvas;
