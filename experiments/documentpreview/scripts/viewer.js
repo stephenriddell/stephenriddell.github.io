@@ -281,7 +281,7 @@
         function onMove(inView) {
             if (inView === pageView.inView) {
                 //page hasn't moved in or out of view, but might have rescaled enough to redraw.
-                if (!pageView.renderGraphicsScale || pageView.renderLogicalScale) {
+                if (!pageView.renderGraphicsScale || !pageView.renderLogicalScale) {
                     return;
                 }
                 if (!pageView.scale()) {
