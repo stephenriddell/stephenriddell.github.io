@@ -289,7 +289,7 @@
                 if (!pageView.context) {
                     return;
                 }
-                var newScale = pageView.scale() * getOutputScale(pageView.context);
+                var newScale = pageView.scale() * getOutputScale(pageView.context).sx;
                 if (newScale / pageView.renderScale > 1.3
                     || pageView.renderScale / newScale > 1.3) {
                     render();
