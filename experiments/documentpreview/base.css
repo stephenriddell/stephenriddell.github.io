@@ -26,4 +26,5 @@
 body {
     background: darkslategrey; 
     max-width: 1280px;
+    margin:auto;
 }
