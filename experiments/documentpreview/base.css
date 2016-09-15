@@ -5,6 +5,7 @@
 
 .pdfview-pageContainer.pdfview-loading {
     background-color: lightseagreen;
+    height: 100%;
 }
 
 .pdfview-pageContainer {
