@@ -162,6 +162,7 @@
                 if (pageNum === pdf.numPages){
                     window.addEventListener('resize', render);
                     container.addEventListener('scroll', render);
+                    pdfViewModel.scale = getDefaultScale();
                     render();
                     finalPageInitialisedResolve(pdfViewModel);
                     return;
@@ -178,6 +179,16 @@
             }
             initPage(0);
         });
+
+        function getDefaultScale() {
+            var pageHeight = pdfViewModel.pages[0].baseSize.h;
+            var pageWidth = pdfViewModel.pages[0].baseSize.w;
+            var containerHeight = container.clientHeight;
+            var containerWidth = container.clientWidth;
+            var hScale = containerHeight / pageHeight;
+            var wScale = containerWidth / pageWidth;
+            return Math.min(hScale, wScale);
+        }
 
         var renderQueued = false;
         function render() {
@@ -304,6 +315,7 @@
                     var height = viewport.height * (scale / pageView.renderLogicalScale) ;
                     var width = viewport.width * (scale / pageView.renderLogicalScale);
                     canvas.style.height = height + 'px';
+                    pageView.div.style.minHeight = pageView.canvas.style.height;
                     canvas.style.width = width + 'px';
                     pageView.size.h = height;
                     pageView.size.w = width;
@@ -337,7 +349,6 @@
             var viewport = page.getViewport(scale);
             pageView.viewport = viewport;
             var canvas = document.createElement('canvas');
-            var oldCanvas = pageView.canvas;
             pageView.canvas = canvas;
             var context = canvas.getContext('2d');
             pageView.context = context;
@@ -358,6 +369,7 @@
             canvas.height = viewport.height * outputScale.sy;
             canvas.width = viewport.width * outputScale.sx;
             canvas.style.height = viewport.height + 'px';
+            pageView.div.style.minHeight = pageView.canvas.style.height;
             canvas.style.width = viewport.width + 'px';
             pageView.size.h = viewport.height;
             pageView.size.w = viewport.width;
@@ -419,6 +431,7 @@
                     pageView.div.removeChild(pageView.canvas);
                 }    
                 pageView.div.classList.add(CLASS_LOADING);
+                pageView.div.style.minHeight = pageView.canvas.style.height;
                 delete pageView.canvas;
             }
         }
