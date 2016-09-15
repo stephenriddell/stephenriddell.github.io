@@ -379,7 +379,7 @@
 
             function renderComplete(error) {
                 while (pageView.div.firstChild) {
-                    pageView.div.remove(pageView.div.firstChild);
+                    pageView.div.removeChild(pageView.div.firstChild);
                 }
                 pageView.div.appendChild(canvas);
                 canvas.removeAttribute('hidden');
