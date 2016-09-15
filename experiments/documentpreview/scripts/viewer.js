@@ -289,17 +289,19 @@
                 if (!pageView.context) {
                     return;
                 }
-                var newScale = pageView.scale() * getOutputScale(pageView.context).sx;
-                if (newScale / pageView.renderScale > 1.3
-                    || pageView.renderScale / newScale > 1.3) {
+                //Determine if scaling has changed enough to redraw.
+                var outputScale = getOutputScale(pageView.context).sx;
+                var newScale = pageView.scale() * outputScale;
+                if (newScale - pageView.renderScale > 0.25
+                    || pageView.renderScale - newScale > 0.25) {
                     render();
                 } else if (inView && pageView.canvas) {
                     //ensure that current size is correct.
                     var canvas = pageView.canvas;
                     var viewport = pageView.viewport;
                     var scale = pageView.scale();
-                    var height = viewport.height * scale / pageView.renderScale;
-                    var width = viewport.width * scale / pageView.renderScale;
+                    var height = viewport.height * scale * outputScale / pageView.renderScale ;
+                    var width = viewport.width * scale * outputScale / pageView.renderScale;
                     canvas.style.height = height + 'px';
                     canvas.style.width = width + 'px';
                     pageView.size.h = height;
@@ -350,7 +352,7 @@
                 }
             }
 
-            pageView.renderScale = scale;
+            pageView.renderScale = scale * outputScale.sx;
             canvas.height = viewport.height * outputScale.sy;
             canvas.width = viewport.width * outputScale.sx;
             canvas.style.height = viewport.height + 'px';
