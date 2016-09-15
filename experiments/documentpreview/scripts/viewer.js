@@ -267,7 +267,8 @@
             baseTotalPrevPagesWidth: 0, //total width of pages before this one. used in conjunction with scaling to position page.
             pageNo: 0, //the 0-indexed page number.
             renderStatus: RENDER_INIT,
-            renderScale: 0, //the previous scale * outputscale this page was rendered at.
+            renderGraphicsScale: 0, //the previous scale * outputscale this page was rendered at.
+            renderLogicalScale: 0, //the previous scale this page was rendered at.
             renderTask: null, //the current rendertask for this page.
             canvas: null,
             context: null,
@@ -280,7 +281,7 @@
         function onMove(inView) {
             if (inView === pageView.inView) {
                 //page hasn't moved in or out of view, but might have rescaled enough to redraw.
-                if (!pageView.renderScale) {
+                if (!pageView.renderGraphicsScale || pageView.renderLogicalScale) {
                     return;
                 }
                 if (!pageView.scale()) {
@@ -292,16 +293,16 @@
                 //Determine if scaling has changed enough to redraw.
                 var outputScale = getOutputScale(pageView.context).sx;
                 var newScale = pageView.scale() * outputScale;
-                if (newScale - pageView.renderScale > 0.25
-                    || pageView.renderScale - newScale > 0.25) {
+                if (newScale - pageView.renderGraphicsScale > 0.25
+                    || pageView.renderGraphicsScale - newScale > 0.25) {
                     render();
                 } else if (inView && pageView.canvas) {
                     //ensure that current size is correct.
                     var canvas = pageView.canvas;
                     var viewport = pageView.viewport;
                     var scale = pageView.scale();
-                    var height = viewport.height * scale * outputScale / pageView.renderScale ;
-                    var width = viewport.width * scale * outputScale / pageView.renderScale;
+                    var height = viewport.height * (scale / pageView.renderLogicalScale) ;
+                    var width = viewport.width * (scale / pageView.renderLogicalScale);
                     canvas.style.height = height + 'px';
                     canvas.style.width = width + 'px';
                     pageView.size.h = height;
@@ -352,7 +353,8 @@
                 }
             }
 
-            pageView.renderScale = scale * outputScale.sx;
+            pageView.renderGraphicsScale = scale * outputScale.sx;
+            pageView.renderLogicalScale = scale;
             canvas.height = viewport.height * outputScale.sy;
             canvas.width = viewport.width * outputScale.sx;
             canvas.style.height = viewport.height + 'px';
