@@ -295,7 +295,7 @@
                 var newScale = pageView.scale() * outputScale;
                 if (newScale - pageView.renderGraphicsScale > 0.25
                     || pageView.renderGraphicsScale - newScale > 0.25) {
-                    render();
+                    render().then(function () { }, function () { });
                 } else if (inView && pageView.canvas) {
                     //ensure that current size is correct.
                     var canvas = pageView.canvas;
@@ -313,7 +313,7 @@
                 //has changed visibility;
                 pageView.inView = inView;
                 if (pageView.inView) {
-                    render();
+                    render().then(function () { }, function () { });
                 } else {
                     reset();
                 }
