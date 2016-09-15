@@ -15,8 +15,10 @@
 }
 
 #document-viewer {
-    max-width: 650px;
-    height:800px;
+    width: 100%;
+    height: 450px;
+    max-width:100vh;
+    max-height:100vh;
     margin:auto;
     background-color:cyan;
 }
