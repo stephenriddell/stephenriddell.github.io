@@ -187,7 +187,8 @@
             var containerWidth = container.clientWidth;
             var hScale = containerHeight / pageHeight;
             var wScale = containerWidth / pageWidth;
-            return Math.min(hScale, wScale);
+            var scale = Math.min(hScale, wScale);
+            return Math.max(scale, 0.5);
         }
 
         var renderQueued = false;
