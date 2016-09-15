@@ -244,6 +244,9 @@
             scale: function (value) {
                 if (value) {
                     _scale = value;
+                    if (pageView.div && pageView.baseSize && pageView.baseSize.w) {
+                        pageView.div.style.width = '' + (pageView.baseSize.w * _scale) + 'px';
+                    }
                     return;
                 }
                 return _scale;

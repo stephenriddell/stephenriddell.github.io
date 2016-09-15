@@ -1,7 +1,5 @@
 .pdfview-container {
     overflow: scroll;
-    max-width: 100vh;
-    max-height: 100vh;
     position: relative;
 }
 
@@ -11,6 +9,8 @@
 
 .pdfview-pageContainer {
     position: absolute;
+    min-height: 1px;
+    min-width: 20px;
 }
 
 #document-viewer {
